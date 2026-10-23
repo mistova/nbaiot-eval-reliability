@@ -1,0 +1,14 @@
+{
+  "dosya_sayisi": 89,
+  "toplam_satir": 7062606,
+  "toplam_tekil": 5215807,
+  "saldiri_tekillik_%": 72.269,
+  "iyi_huylu_tekillik_%": 92.366,
+  "tekillik_10_alti_turler": [
+    "gafgyt:tcp",
+    "gafgyt:udp"
+  ],
+  "turler_arasi_cakisma_cifti": 9,
+  "iyi_saldiri_cakisma_cifti": 0,
+  "cihazlar_arasi_cakisma_cifti": 233
+}

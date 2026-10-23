@@ -1,0 +1,12 @@
+,S1,S2,S3
+benign,0.9999,1.0,0.9998
+gafgyt:combo,0.9987,0.9993,1.0
+gafgyt:junk,0.9973,0.9949,0.0726
+gafgyt:scan,1.0,0.9995,1.0
+gafgyt:tcp,0.9767,0.0,0.9988
+gafgyt:udp,0.9996,0.1429,0.9988
+mirai:ack,0.9998,1.0,0.9996
+mirai:scan,1.0,1.0,1.0
+mirai:syn,1.0,1.0,1.0
+mirai:udp,1.0,0.9999,1.0
+mirai:udpplain,0.9997,0.9997,0.9984

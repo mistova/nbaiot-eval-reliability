@@ -1,0 +1,11 @@
+aile,tur,D-D,G-D,G-G
+gafgyt,gafgyt:combo,0.9999,0.9997,0.9997
+gafgyt,gafgyt:junk,0.9999,0.9997,0.9996
+gafgyt,gafgyt:scan,0.9998,0.9996,0.9996
+gafgyt,gafgyt:tcp,0.1119,0.0006,0.0003
+gafgyt,gafgyt:udp,0.1115,0.0002,0.0
+mirai,mirai:ack,0.9999,0.9999,0.9999
+mirai,mirai:scan,0.9994,0.9991,0.999
+mirai,mirai:syn,0.9999,0.9997,0.9996
+mirai,mirai:udp,0.9998,0.9997,0.9997
+mirai,mirai:udpplain,1.0,0.9999,1.0

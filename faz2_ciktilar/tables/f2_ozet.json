@@ -1,0 +1,72 @@
+{
+  "rejim": "tek sinifli anomali tespiti",
+  "ana_metrik": "TPR@esik",
+  "hedef_fpr": 0.01,
+  "tekillestirme": false,
+  "kosu_gurultu_tabani_yuzde_puan": 0.0011,
+  "yapilandirma_ortalamalari": {
+    "G-G": 0.7521,
+    "G-D": 0.7522,
+    "C-D": 0.7523,
+    "R-D": 0.7746,
+    "D-D": 0.7747,
+    "D-D2": 0.7747
+  },
+  "primler": [
+    {
+      "Karsilastirma": "D-D vs G-G",
+      "Prim (yuzde puan)": 2.254,
+      "Std": 6.688,
+      "t": 1.011,
+      "p": 0.3415,
+      "p_wilcoxon": 0.0117,
+      "D-D kazandi": 8,
+      "n": 9,
+      "Gurultu tabaninin kaci": 2029.0
+    },
+    {
+      "Karsilastirma": "D-D vs G-D",
+      "Prim (yuzde puan)": 2.247,
+      "Std": 6.68,
+      "t": 1.009,
+      "p": 0.3425,
+      "p_wilcoxon": 0.0078,
+      "D-D kazandi": 8,
+      "n": 9,
+      "Gurultu tabaninin kaci": 2022.0
+    },
+    {
+      "Karsilastirma": "D-D vs C-D",
+      "Prim (yuzde puan)": 2.237,
+      "Std": 6.684,
+      "t": 1.004,
+      "p": 0.3448,
+      "p_wilcoxon": 0.0625,
+      "D-D kazandi": 5,
+      "n": 9,
+      "Gurultu tabaninin kaci": 2013.0
+    },
+    {
+      "Karsilastirma": "D-D vs R-D",
+      "Prim (yuzde puan)": 0.007,
+      "Std": 0.01,
+      "t": 2.0,
+      "p": 0.0805,
+      "p_wilcoxon": 0.125,
+      "D-D kazandi": 4,
+      "n": 9,
+      "Gurultu tabaninin kaci": 6.0
+    },
+    {
+      "Karsilastirma": "D-D vs D-D2",
+      "Prim (yuzde puan)": -0.001,
+      "Std": 0.003,
+      "t": -1.0,
+      "p": 0.3466,
+      "p_wilcoxon": 1.0,
+      "D-D kazandi": 0,
+      "n": 9,
+      "Gurultu tabaninin kaci": 1.0
+    }
+  ]
+}

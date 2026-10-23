@@ -1,0 +1,38 @@
+{
+  "bolum_A": {
+    "zor_bant_genisligi_log10_ort": 0.0,
+    "iyi_bant_genisligi_log10_ort": 1.868,
+    "zor_saldirinin_iyi_huylu_yuzdeligi_ort": 0.969,
+    "TPR90_icin_gereken_FPR_ort": 0.0325
+  },
+  "bolum_B": {
+    "tohum_sayisi": 10,
+    "uclarda_kalma_orani": 1.0,
+    "strateji_bazli_risk": [
+      {
+        "strateji": "log_q99",
+        "ortalama_kararlilik": 0.867,
+        "kararsiz_cihaz": 3,
+        "toplam_cihaz": 9,
+        "ortalama_TPR": 0.467,
+        "TPR_std_ort": 0.1876
+      },
+      {
+        "strateji": "q99_budanmis",
+        "ortalama_kararlilik": 0.867,
+        "kararsiz_cihaz": 3,
+        "toplam_cihaz": 9,
+        "ortalama_TPR": 0.245,
+        "TPR_std_ort": 0.1906
+      },
+      {
+        "strateji": "q99_esik",
+        "ortalama_kararlilik": 0.978,
+        "kararsiz_cihaz": 0,
+        "toplam_cihaz": 9,
+        "ortalama_TPR": 0.1339,
+        "TPR_std_ort": 0.0666
+      }
+    ]
+  }
+}

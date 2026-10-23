@@ -1,0 +1,15 @@
+strateji,yapilandirma,tohum_farki_ort,tohum_farki_max
+q99_esik,D-D,0.003,0.008
+q99_esik,G-G,0.004,0.01
+q99_kal,D-D,11.102,99.895
+q99_kal,G-G,11.106,99.89
+q99_budanmis,D-D,33.304,99.903
+q99_budanmis,G-G,0.009,0.023
+medyan_3mad,D-D,0.0,0.0
+medyan_3mad,G-G,11.101,99.907
+medyan_6mad,D-D,0.0,0.0
+medyan_6mad,G-G,22.198,99.897
+log_q99,D-D,33.301,99.902
+log_q99,G-G,22.202,99.902
+kahin,D-D,22.204,99.91
+kahin,G-G,11.107,99.89

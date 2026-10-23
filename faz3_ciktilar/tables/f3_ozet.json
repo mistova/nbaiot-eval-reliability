@@ -1,0 +1,63 @@
+{
+  "bolum_A_tani": {
+    "gafgyt:udp": {
+      "TPR": 0.1115,
+      "ROC_AUC": 0.9714
+    },
+    "gafgyt:tcp": {
+      "TPR": 0.1119,
+      "ROC_AUC": 0.9714
+    },
+    "gafgyt:scan": {
+      "TPR": 0.9998,
+      "ROC_AUC": 0.9999
+    },
+    "mirai:scan": {
+      "TPR": 0.9994,
+      "ROC_AUC": 1.0
+    },
+    "mirai:syn": {
+      "TPR": 0.9999,
+      "ROC_AUC": 1.0
+    },
+    "gafgyt:junk": {
+      "TPR": 0.9999,
+      "ROC_AUC": 1.0
+    },
+    "gafgyt:combo": {
+      "TPR": 0.9999,
+      "ROC_AUC": 1.0
+    },
+    "mirai:udp": {
+      "TPR": 0.9998,
+      "ROC_AUC": 1.0
+    },
+    "mirai:udpplain": {
+      "TPR": 1.0,
+      "ROC_AUC": 1.0
+    },
+    "mirai:ack": {
+      "TPR": 0.9999,
+      "ROC_AUC": 1.0
+    }
+  },
+  "bolum_B_normal_genisleme_medyan": {
+    "SimpleHome_XCS7_1003_WHT_Security_Camera": 30.252,
+    "Danmini_Doorbell": 10.456,
+    "Ennio_Doorbell": 2.91,
+    "Philips_B120N10_Baby_Monitor": 2.853,
+    "SimpleHome_XCS7_1002_WHT_Security_Camera": 1.318,
+    "Provision_PT_737E_Security_Camera": 1.004,
+    "Provision_PT_838_Security_Camera": 0.404,
+    "Samsung_SNH_1011_N_Webcam": 0.369,
+    "Ecobee_Thermostat": 0.162
+  },
+  "bolum_C": {
+    "gurultu_tabani_TPR": 0.0182,
+    "tam_veri_en_iyi_orani": {
+      "TPR_genel": 0.333,
+      "TPR_zor": 0.556,
+      "AUC_zor": 0.667
+    }
+  }
+}

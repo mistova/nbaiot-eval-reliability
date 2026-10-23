@@ -1,0 +1,3 @@
+[submodule "kaynak_kod/Kitsune-py"]
+	path = kaynak_kod/Kitsune-py
+	url = https://github.com/ymirsky/Kitsune-py

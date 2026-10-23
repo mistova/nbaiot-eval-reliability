@@ -1,0 +1,34 @@
+{
+  "bolme_tanimlari": {
+    "S1": "rastgele satir",
+    "S2": "kuresel tekillestirme + rastgele",
+    "S3": "zamansal (dosya ici)",
+    "S4": "bir cihaz disarida",
+    "S5": "bir Mirai kumesi disarida"
+  },
+  "sizinti_%": {
+    "S1": 80.67,
+    "S2": 0.0,
+    "S3": 30.5,
+    "S4": 90.59,
+    "S5": 34.82
+  },
+  "RandomForest_F1_makro": {
+    "S1": 0.9975,
+    "S2": 0.8404,
+    "S3": 0.9037,
+    "S4": 0.932,
+    "S5": 0.9568
+  },
+  "RandomForest_MCC": {
+    "S1": 0.9994,
+    "S2": 0.9998,
+    "S3": 0.9992,
+    "S4": 0.9986,
+    "S5": 0.9939
+  },
+  "S5_gafgyt_vs_mirai_tur_dogrulugu": {
+    "gafgyt": 0.8719,
+    "mirai": 0.779
+  }
+}

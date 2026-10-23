@@ -1,0 +1,26 @@
+{
+  "veri": {
+    "toplam_satir_yuklenen": 2155932,
+    "oznitelik": 115,
+    "cihaz": 9,
+    "iyi_huylu_satir": 555932
+  },
+  "butunluk": {
+    "eksik_deger": 0,
+    "sonsuz_deger": 0,
+    "yinelenen_satir": 402043,
+    "sabit_oznitelik": 0
+  },
+  "sizinti": {
+    "rastgele_bolme_dogruluk": 0.9807,
+    "zamansal_bolme_dogruluk": 0.9768,
+    "sizinti_yuzde_puan": 0.39
+  },
+  "cihaz_ayirt_edilebilirlik": {
+    "dogruluk": 0.9805,
+    "tesaduf_duzeyi": 0.1111,
+    "tesadufun_kati": 8.8,
+    "en_iyi_cihaz": "Philips_B120N10_Baby_Monitor",
+    "en_kotu_cihaz": "Provision_PT_737E_Security_Camera"
+  }
+}

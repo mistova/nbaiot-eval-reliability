@@ -1,0 +1,4 @@
+strateji,ortalama_kararlilik,kararsiz_cihaz,toplam_cihaz,ortalama_TPR,TPR_std_ort
+log_q99,0.867,3,9,0.467,0.1876
+q99_budanmis,0.867,3,9,0.245,0.1906
+q99_esik,0.978,0,9,0.1339,0.0666

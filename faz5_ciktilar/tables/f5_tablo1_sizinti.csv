@@ -1,0 +1,16 @@
+bolme,kat,test_satir,sizinti_tum_%,sizinti_benign_%,sizinti_gafgyt_%,sizinti_mirai_%
+S1,-,2118782,80.666,10.264,99.805,76.521
+S2,-,683453,0.0,0.0,0.0,0.0
+S3,-,2118826,30.503,10.656,66.336,5.786
+S4,Danmini_Doorbell,1018298,90.78,0.0,99.759,93.318
+S4,Ecobee_Thermostat,835876,97.354,0.0,100.0,98.242
+S4,Ennio_Doorbell,355500,88.956,0.023,99.946,
+S4,Philips_B120N10_Baby_Monitor,1098677,83.851,0.0,100.0,99.642
+S4,Provision_PT_737E_Security_Camera,828260,90.672,0.006,99.643,96.804
+S4,Provision_PT_838_Security_Camera,836891,87.362,0.006,100.0,98.309
+S4,Samsung_SNH_1011_N_Webcam,375222,86.102,0.004,100.0,
+S4,SimpleHome_XCS7_1002_WHT_Security_Camera,863056,94.207,0.004,100.0,99.334
+S4,SimpleHome_XCS7_1003_WHT_Security_Camera,850826,96.031,0.01,99.647,97.45
+S5,K1,2116975,29.694,0.0,99.878,0.0
+S5,K2,2549758,36.442,0.0,99.88,0.001
+S5,K3,1665151,38.313,0.004,99.816,0.0

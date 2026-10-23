@@ -1,0 +1,169 @@
+{
+  "esik_tanisi": {
+    "ortalama_kayma_orani": 1.168,
+    "ortalama_kuyruk_agirligi": 188.672
+  },
+  "kahin_kazanci": {
+    "mevcut_TPR_zor": 0.1117,
+    "kahin_TPR_zor": 0.2228
+  },
+  "en_iyi_gercekci_strateji": "log_q99",
+  "prim_esige_gore": [
+    {
+      "strateji": "q99_esik",
+      "metrik": "TPR_zor",
+      "prim_yuzde_puan": 0.031,
+      "std": 0.019,
+      "p_ttest": 0.0014,
+      "p_wilcoxon": 0.0039,
+      "D-D kazandi": 9,
+      "n": 9
+    },
+    {
+      "strateji": "q99_kal",
+      "metrik": "TPR_zor",
+      "prim_yuzde_puan": 11.137,
+      "std": 41.627,
+      "p_ttest": 0.4454,
+      "p_wilcoxon": 0.1094,
+      "D-D kazandi": 7,
+      "n": 9
+    },
+    {
+      "strateji": "q99_budanmis",
+      "metrik": "TPR_zor",
+      "prim_yuzde_puan": 16.681,
+      "std": 24.974,
+      "p_ttest": 0.08,
+      "p_wilcoxon": 0.0078,
+      "D-D kazandi": 8,
+      "n": 9
+    },
+    {
+      "strateji": "medyan_3mad",
+      "metrik": "TPR_zor",
+      "prim_yuzde_puan": 5.552,
+      "std": 16.655,
+      "p_ttest": 0.3466,
+      "p_wilcoxon": 1.0,
+      "D-D kazandi": 1,
+      "n": 9
+    },
+    {
+      "strateji": "medyan_6mad",
+      "metrik": "TPR_zor",
+      "prim_yuzde_puan": 11.104,
+      "std": 22.034,
+      "p_ttest": 0.169,
+      "p_wilcoxon": 0.5,
+      "D-D kazandi": 2,
+      "n": 9
+    },
+    {
+      "strateji": "log_q99",
+      "metrik": "TPR_zor",
+      "prim_yuzde_puan": 16.683,
+      "std": 24.982,
+      "p_ttest": 0.0801,
+      "p_wilcoxon": 0.0078,
+      "D-D kazandi": 8,
+      "n": 9
+    },
+    {
+      "strateji": "kahin",
+      "metrik": "TPR_zor",
+      "prim_yuzde_puan": 5.584,
+      "std": 30.025,
+      "p_ttest": 0.5921,
+      "p_wilcoxon": 0.0742,
+      "D-D kazandi": 8,
+      "n": 9
+    }
+  ],
+  "gurultu_tabani": [
+    {
+      "strateji": "q99_esik",
+      "yapilandirma": "D-D",
+      "tohum_farki_ort": 0.003,
+      "tohum_farki_max": 0.008
+    },
+    {
+      "strateji": "q99_esik",
+      "yapilandirma": "G-G",
+      "tohum_farki_ort": 0.004,
+      "tohum_farki_max": 0.01
+    },
+    {
+      "strateji": "q99_kal",
+      "yapilandirma": "D-D",
+      "tohum_farki_ort": 11.102,
+      "tohum_farki_max": 99.895
+    },
+    {
+      "strateji": "q99_kal",
+      "yapilandirma": "G-G",
+      "tohum_farki_ort": 11.106,
+      "tohum_farki_max": 99.89
+    },
+    {
+      "strateji": "q99_budanmis",
+      "yapilandirma": "D-D",
+      "tohum_farki_ort": 33.304,
+      "tohum_farki_max": 99.903
+    },
+    {
+      "strateji": "q99_budanmis",
+      "yapilandirma": "G-G",
+      "tohum_farki_ort": 0.009,
+      "tohum_farki_max": 0.023
+    },
+    {
+      "strateji": "medyan_3mad",
+      "yapilandirma": "D-D",
+      "tohum_farki_ort": 0.0,
+      "tohum_farki_max": 0.0
+    },
+    {
+      "strateji": "medyan_3mad",
+      "yapilandirma": "G-G",
+      "tohum_farki_ort": 11.101,
+      "tohum_farki_max": 99.907
+    },
+    {
+      "strateji": "medyan_6mad",
+      "yapilandirma": "D-D",
+      "tohum_farki_ort": 0.0,
+      "tohum_farki_max": 0.0
+    },
+    {
+      "strateji": "medyan_6mad",
+      "yapilandirma": "G-G",
+      "tohum_farki_ort": 22.198,
+      "tohum_farki_max": 99.897
+    },
+    {
+      "strateji": "log_q99",
+      "yapilandirma": "D-D",
+      "tohum_farki_ort": 33.301,
+      "tohum_farki_max": 99.902
+    },
+    {
+      "strateji": "log_q99",
+      "yapilandirma": "G-G",
+      "tohum_farki_ort": 22.202,
+      "tohum_farki_max": 99.902
+    },
+    {
+      "strateji": "kahin",
+      "yapilandirma": "D-D",
+      "tohum_farki_ort": 22.204,
+      "tohum_farki_max": 99.91
+    },
+    {
+      "strateji": "kahin",
+      "yapilandirma": "G-G",
+      "tohum_farki_ort": 11.107,
+      "tohum_farki_max": 99.89
+    }
+  ]
+}

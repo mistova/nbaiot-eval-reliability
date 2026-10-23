@@ -1,0 +1,9 @@
+veri/*/
+!veri/nbaiot_denetim/
+*/checkpoint/
+*/cache/
+*/logs/
+*.pkl
+*.npz
+__pycache__/
+.ipynb_checkpoints/

@@ -1,0 +1,674 @@
+{
+  "CTU-Honeypot-Capture-4-1": {
+    "satir": 452,
+    "hatali": 0,
+    "ip_sayisi": 1,
+    "etiket": {
+      "benign": 452
+    },
+    "detay": {
+      "-": 452
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.1.132",
+        452
+      ]
+    ]
+  },
+  "CTU-Honeypot-Capture-5-1": {
+    "satir": 1374,
+    "hatali": 0,
+    "ip_sayisi": 24,
+    "etiket": {
+      "benign": 1374
+    },
+    "detay": {
+      "-": 1374
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.2.3",
+        979
+      ],
+      [
+        "0.0.0.0",
+        153
+      ],
+      [
+        "192.168.2.1",
+        51
+      ]
+    ]
+  },
+  "Somfy-01": {
+    "satir": 130,
+    "hatali": 0,
+    "ip_sayisi": 11,
+    "etiket": {
+      "benign": 130
+    },
+    "detay": {
+      "-": 130
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "fe80::5bcc:698e:39d5:cdf",
+        64
+      ],
+      [
+        "::",
+        24
+      ],
+      [
+        "0.0.0.0",
+        13
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-1-1": {
+    "satir": 300000,
+    "hatali": 0,
+    "ip_sayisi": 6870,
+    "etiket": {
+      "Malicious": 163172,
+      "Benign": 136828
+    },
+    "detay": {
+      "PartOfAHorizontalPortScan": 163169,
+      "-": 136828,
+      "C&C": 3
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.100.103",
+        292373
+      ],
+      [
+        "192.168.100.1",
+        487
+      ],
+      [
+        "4.68.110.10",
+        18
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-17-1": {
+    "satir": 300000,
+    "hatali": 0,
+    "ip_sayisi": 57,
+    "etiket": {
+      "Malicious": 299835,
+      "Benign": 165
+    },
+    "detay": {
+      "PartOfAHorizontalPortScan": 149862,
+      "Okiru": 75032,
+      "DDoS": 74904,
+      "C&C-HeartBeat": 37,
+      "-": 165
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.100.111",
+        299944
+      ],
+      [
+        "197.13.3.22",
+        1
+      ],
+      [
+        "212.234.209.150",
+        1
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-20-1": {
+    "satir": 3209,
+    "hatali": 0,
+    "ip_sayisi": 3,
+    "etiket": {
+      "Benign": 3193,
+      "Malicious": 16
+    },
+    "detay": {
+      "-": 3193,
+      "C&C-Torii": 16
+    },
+    "temiz_ip": [
+      [
+        "192.168.100.103",
+        3191,
+        3207
+      ]
+    ],
+    "en_yogun_ip": [
+      [
+        "192.168.100.103",
+        3207
+      ],
+      [
+        "192.168.100.102",
+        1
+      ],
+      [
+        "169.254.77.178",
+        1
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-21-1": {
+    "satir": 3286,
+    "hatali": 0,
+    "ip_sayisi": 3,
+    "etiket": {
+      "Benign": 3272,
+      "Malicious": 14
+    },
+    "detay": {
+      "-": 3272,
+      "C&C-Torii": 14
+    },
+    "temiz_ip": [
+      [
+        "192.168.100.113",
+        3270,
+        3284
+      ]
+    ],
+    "en_yogun_ip": [
+      [
+        "192.168.100.113",
+        3284
+      ],
+      [
+        "192.168.100.102",
+        1
+      ],
+      [
+        "192.168.100.1",
+        1
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-3-1": {
+    "satir": 156103,
+    "hatali": 0,
+    "ip_sayisi": 961,
+    "etiket": {
+      "Malicious": 151567,
+      "Benign": 4536
+    },
+    "detay": {
+      "PartOfAHorizontalPortScan": 145597,
+      "-": 4536,
+      "C&C": 8,
+      "Attack": 5962
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.2.5",
+        154886
+      ],
+      [
+        "193.49.65.3",
+        26
+      ],
+      [
+        "68.86.93.126",
+        20
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-33-1": {
+    "satir": 300000,
+    "hatali": 0,
+    "ip_sayisi": 68,
+    "etiket": {
+      "Benign": 7623,
+      "Malicious": 292377
+    },
+    "detay": {
+      "-": 7623,
+      "PartOfAHorizontalPortScan": 217322,
+      "Okiru": 75032,
+      "C&C-HeartBeat": 23
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.1.197",
+        299933
+      ],
+      [
+        "217.141.253.9",
+        1
+      ],
+      [
+        "210.80.79.50",
+        1
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-34-1": {
+    "satir": 23145,
+    "hatali": 0,
+    "ip_sayisi": 2,
+    "etiket": {
+      "Benign": 1923,
+      "Malicious": 21222
+    },
+    "detay": {
+      "-": 1923,
+      "C&C": 6706,
+      "PartOfAHorizontalPortScan": 122,
+      "DDoS": 14394
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.1.195",
+        23144
+      ],
+      [
+        "192.168.1.1",
+        1
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-35-1": {
+    "satir": 300000,
+    "hatali": 0,
+    "ip_sayisi": 51,
+    "etiket": {
+      "Malicious": 91,
+      "Benign": 299909
+    },
+    "detay": {
+      "C&C": 80,
+      "-": 299909,
+      "C&C-FileDownload": 11
+    },
+    "temiz_ip": [
+      [
+        "192.168.1.196",
+        299859,
+        299950
+      ]
+    ],
+    "en_yogun_ip": [
+      [
+        "192.168.1.196",
+        299950
+      ],
+      [
+        "192.168.1.1",
+        1
+      ],
+      [
+        "202.213.197.18",
+        1
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-36-1": {
+    "satir": 300000,
+    "hatali": 0,
+    "ip_sayisi": 26,
+    "etiket": {
+      "Malicious": 299938,
+      "Benign": 62
+    },
+    "detay": {
+      "C&C-HeartBeat": 345,
+      "Okiru": 299590,
+      "-": 62,
+      "Okiru-Attack": 3
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.1.198",
+        299974
+      ],
+      [
+        "192.168.1.1",
+        2
+      ],
+      [
+        "154.197.41.78",
+        1
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-39-1": {
+    "satir": 300000,
+    "hatali": 0,
+    "ip_sayisi": 5,
+    "etiket": {
+      "Benign": 79,
+      "Malicious": 299921
+    },
+    "detay": {
+      "-": 79,
+      "C&C": 14,
+      "PartOfAHorizontalPortScan": 299905,
+      "Attack": 2
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.1.194",
+        299996
+      ],
+      [
+        "192.157.40.2",
+        1
+      ],
+      [
+        "2.243.22.125",
+        1
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-42-1": {
+    "satir": 4426,
+    "hatali": 0,
+    "ip_sayisi": 3,
+    "etiket": {
+      "Malicious": 6,
+      "Benign": 4420
+    },
+    "detay": {
+      "FileDownload": 3,
+      "C&C-FileDownload": 3,
+      "-": 4420
+    },
+    "temiz_ip": [
+      [
+        "192.168.1.197",
+        4415,
+        4421
+      ]
+    ],
+    "en_yogun_ip": [
+      [
+        "192.168.1.197",
+        4421
+      ],
+      [
+        "192.168.1.1",
+        4
+      ],
+      [
+        "185.244.25.183",
+        1
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-43-1": {
+    "satir": 300000,
+    "hatali": 0,
+    "ip_sayisi": 5,
+    "etiket": {
+      "Malicious": 207628,
+      "Benign": 92372
+    },
+    "detay": {
+      "C&C": 50,
+      "-": 92372,
+      "C&C-FileDownload": 13,
+      "Okiru": 38805,
+      "PartOfAHorizontalPortScan": 168760
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.1.198",
+        299996
+      ],
+      [
+        "96.108.119.82",
+        1
+      ],
+      [
+        "45.199.216.73",
+        1
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-44-1": {
+    "satir": 237,
+    "hatali": 0,
+    "ip_sayisi": 2,
+    "etiket": {
+      "Malicious": 26,
+      "Benign": 211
+    },
+    "detay": {
+      "C&C-FileDownload": 11,
+      "C&C": 14,
+      "-": 211,
+      "DDoS": 1
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.1.199",
+        235
+      ],
+      [
+        "192.168.1.1",
+        2
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-48-1": {
+    "satir": 300000,
+    "hatali": 0,
+    "ip_sayisi": 269,
+    "etiket": {
+      "Malicious": 299574,
+      "Benign": 426
+    },
+    "detay": {
+      "C&C-HeartBeat-FileDownload": 11,
+      "PartOfAHorizontalPortScan": 299269,
+      "Attack": 294,
+      "-": 426
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.1.200",
+        299726
+      ],
+      [
+        "192.168.1.1",
+        3
+      ],
+      [
+        "140.141.4.1",
+        2
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-49-1": {
+    "satir": 300000,
+    "hatali": 0,
+    "ip_sayisi": 81,
+    "etiket": {
+      "Malicious": 299779,
+      "Benign": 221
+    },
+    "detay": {
+      "FileDownload": 14,
+      "-": 221,
+      "PartOfAHorizontalPortScan": 299658,
+      "C&C": 107
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.1.193",
+        299910
+      ],
+      [
+        "197.13.3.14",
+        4
+      ],
+      [
+        "77.81.119.9",
+        2
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-52-1": {
+    "satir": 300000,
+    "hatali": 0,
+    "ip_sayisi": 16,
+    "etiket": {
+      "Malicious": 299980,
+      "Benign": 20
+    },
+    "detay": {
+      "C&C-FileDownload": 12,
+      "C&C": 6,
+      "PartOfAHorizontalPortScan": 299961,
+      "C&C-Mirai": 1,
+      "-": 20
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.1.197",
+        299984
+      ],
+      [
+        "192.168.1.1",
+        2
+      ],
+      [
+        "112.188.83.10",
+        1
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-60-1": {
+    "satir": 300000,
+    "hatali": 0,
+    "ip_sayisi": 4,
+    "etiket": {
+      "Benign": 610,
+      "Malicious": 299390
+    },
+    "detay": {
+      "-": 610,
+      "C&C-HeartBeat": 94,
+      "DDoS": 299296
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.1.195",
+        299839
+      ],
+      [
+        "162.248.88.215",
+        159
+      ],
+      [
+        "192.168.1.1",
+        1
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-7-1": {
+    "satir": 300000,
+    "hatali": 0,
+    "ip_sayisi": 213,
+    "etiket": {
+      "Benign": 423,
+      "Malicious": 299577
+    },
+    "detay": {
+      "-": 423,
+      "C&C-HeartBeat": 340,
+      "Okiru": 299237
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.100.108",
+        299786
+      ],
+      [
+        "192.168.100.102",
+        3
+      ],
+      [
+        "192.168.100.1",
+        1
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-8-1": {
+    "satir": 10403,
+    "hatali": 0,
+    "ip_sayisi": 2,
+    "etiket": {
+      "Benign": 2181,
+      "Malicious": 8222
+    },
+    "detay": {
+      "-": 2181,
+      "C&C": 8222
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.100.113",
+        10401
+      ],
+      [
+        "192.168.100.102",
+        2
+      ]
+    ]
+  },
+  "CTU-IoT-Malware-Capture-9-1": {
+    "satir": 300000,
+    "hatali": 0,
+    "ip_sayisi": 114,
+    "etiket": {
+      "Benign": 1939,
+      "Malicious": 298061
+    },
+    "detay": {
+      "-": 1939,
+      "PartOfAHorizontalPortScan": 298061
+    },
+    "temiz_ip": [],
+    "en_yogun_ip": [
+      [
+        "192.168.100.111",
+        299872
+      ],
+      [
+        "192.168.100.102",
+        5
+      ],
+      [
+        "103.195.25.38",
+        3
+      ]
+    ]
+  }
+}
