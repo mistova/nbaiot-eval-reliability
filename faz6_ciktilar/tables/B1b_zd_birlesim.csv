@@ -1,0 +1,12 @@
+s,m,v,u
+benign,0.17,12.06,12.24
+gafgyt:combo,0.01,99.99,100.0
+gafgyt:junk,0.03,99.97,100.0
+gafgyt:scan,34.26,65.74,100.0
+gafgyt:tcp,99.91,0.09,100.0
+gafgyt:udp,99.91,0.09,100.0
+mirai:ack,31.67,68.33,100.0
+mirai:scan,99.57,0.43,100.0
+mirai:syn,29.2,70.8,100.0
+mirai:udp,33.27,66.73,100.0
+mirai:udpplain,38.89,61.11,100.0

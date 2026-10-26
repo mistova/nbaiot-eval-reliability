@@ -4,8 +4,25 @@ This repository contains the analysis code and the raw result tables (CSV/JSON) 
 audit of how evaluation protocols interact with dataset properties on N-BaIoT and seven other
 network-traffic datasets, together with an evaluation-reliability profile.
 
-> The accompanying manuscript is in preparation. The written interpretation of the results will be
-> added to this repository at submission time. Code comments and table column names are in Turkish.
+> The accompanying manuscript is under review. Code comments and table column names are in Turkish.
+
+## Manuscript ↔ code
+
+| Manuscript | Code | Result tables |
+|---|---|---|
+| Sect. 4 (audit: uniqueness, timestamp, shared captures) | `veri/nbaiot_denetim.py`, `veri/nbaiot_jitter_zaman.py`, `veri/nbaiot_zd_birlesim.py`, `faz6_dogrulama.py` (parts A, B) | `faz6_ciktilar/tables/A*.csv`, `B*.csv` |
+| Sect. 4.2 (Kitsune initialisation) | `faz7_L_kitsune.py` (uses `kaynak_kod/Kitsune-py`) | `faz7_ciktilar/tables/L_kitsune.csv` |
+| Sect. 4.3 (device identifiability) | `faz7_K_kisayol.py` | `faz7_ciktilar/tables/K_kisayol.csv` |
+| Sect. 5 (protocols, leakage, seven models) | `faz6_dogrulama.py` (part D), `faz7_Q_protokoller.py`, `faz7_J_gpu_protokoller.py` | `faz6_ciktilar/tables/D_protokoller.csv`, `faz7_ciktilar/tables/QJ_protokoller.csv` |
+| Sect. 5.2 (memorisation, near-duplicates) | `faz7_I_ezber.py` | `faz7_ciktilar/tables/I_ezber.csv` |
+| Sect. 5.5 (reproduction of the block-disjoint benchmark) | `faz7_H_arumugam.py` (needs the authors' public code) | `faz7_ciktilar/tables/H_*.csv` |
+| Sect. 6 (one-class) | `IoT_Faz2–4*.ipynb`, `faz6_E_tek_sinif.py`, `faz7_P_meidan.py` | `faz6_ciktilar/tables/E_tek_sinif.csv`, `faz7_ciktilar/tables/P_meidan.csv` |
+| Sect. 7 (reliability profile) | `faz8_metrik.py`, `faz8_analiz.py` | `faz8_ciktilar/tables/faz8_*.csv`, `FAZ8_OZET.md` |
+| Sect. 7.4 (ε selection, TOPSIS) | `faz8_eps.py`, `faz8_eps_secim.py` | `faz8_ciktilar/tables/faz8_eps_*.csv`, `FAZ8_EPS.md` |
+| Sect. 7.5 (perturbation) | `faz8_bozma.py` | `faz8_ciktilar/tables/faz8c_bozma.csv`, `FAZ8_BOZMA.md` |
+| Figures and tables | `makale/sekiller.py`, `makale/tablolar.py` | `makale/figures/`, `makale/tablolar/` |
+
+Seeds, hardware and run times are listed in Appendix A of the manuscript.
 
 ## Layout
 
