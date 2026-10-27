@@ -1,6 +1,6 @@
-"""Faz 7 O — CIC-IoT2023: aynı öznitelik vektörünü taşıyan farklı etiketler hangileri (Faz 6 G'nin açık sorusu).
-Ayrıca 11.5 metriği bileşenleri: tekrar payı, rastgele bölmede test-eğitim ikiz payı, 1-NN değil yalnızca hash.
-Kullanım: python3 faz7_O_cic_celiski.py"""
+"""Faz 7 O — CIC-IoT2023: which different labels carry the same feature vector (open question of Faz 6 G).
+Also the 11.5 metric components: duplicate share, test-train twin share under a random split, hash only (not 1-NN).
+Usage: python3 faz7_O_cic_celiski.py"""
 import glob
 import itertools
 
@@ -25,8 +25,8 @@ def main():
     say = d.groupby(["h", "y"], observed=True).size().rename("n").reset_index()
     cok = say.groupby("h").y.transform("nunique")
     c = say[cok > 1]
-    log("çelişkili vektör:", c.h.nunique(), "satır:", int(c.n.sum()))
-    # etiket çiftleri: her çelişkili vektör için etiketlerin tüm ikilileri; satır ağırlığı = o vektörü taşıyan satırlar
+    log("conflicting vectors:", c.h.nunique(), "rows:", int(c.n.sum()))
+    # label pairs: all pairs of labels for each conflicting vector; row weight = rows carrying that vector
     ciftler = {}
     for h, g in c.groupby("h"):
         labs = sorted(g.y.astype(str)); n = int(g.n.sum())
@@ -37,16 +37,16 @@ def main():
                      columns=["etiket_a", "etiket_b", "ortak_vektor", "satir"]).sort_values("satir", ascending=False)
     t.to_csv(f"{TAB}/O_cic2023_celiskili_ciftler.csv", index=False)
     print(t.head(40).to_string(index=False))
-    # etiket başına: satırlarının ne kadarı başka etiketle paylaşılan vektörde
+    # per label: share of its rows whose vector is shared with another label
     pay = say.assign(celiskili=cok > 1).groupby("y", observed=True).apply(
         lambda g: pd.Series({"satir": g.n.sum(), "celiskili_satir_%": 100 * g.n[g.celiskili].sum() / g.n.sum()}))
     pay.sort_values("celiskili_satir_%", ascending=False).to_csv(f"{TAB}/O_cic2023_etiket_celiski_payi.csv")
     print(pay.sort_values("celiskili_satir_%", ascending=False).round(2).to_string())
-    # Li 2026 tavanı: çelişkili vektörlerde çoğunluk etiketi tahmini ile ulaşılabilecek en yüksek doğruluk
+    # Li 2026 ceiling: highest accuracy reachable by predicting the majority label on conflicting vectors
     tavan = say.groupby("h").n.max().sum() / say.n.sum()
     pd.Series({"satir": int(say.n.sum()), "tekil_vektor": int(say.h.nunique()),
                "celiskili_vektor": int(c.h.nunique()), "dogruluk_tavani": float(tavan)}).to_csv(f"{TAB}/O_cic2023_ozet.csv")
-    log("O bitti; doğruluk tavanı", tavan)
+    log("O bitti; accuracy ceiling", tavan)
 
 
 if __name__ == "__main__":

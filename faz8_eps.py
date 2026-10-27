@@ -1,9 +1,9 @@
-"""Faz 8b: ε seçimi için ham en yakın komşu mesafeleri (model eğitimi yok).
-faz8_metrik ile aynı bölmeler ve aynı test örneklemi; her bölme için
-  d     test → eğitim en yakın komşu mesafesi / √boyut
-  d_ic  eğitim örneklemi → eğitim (kendisi hariç) en yakın komşu mesafesi / √boyut (verinin doğal yoğunluk ölçeği)
-P3/P4 sırasıyla P2/P0 ile aynı mesafeleri paylaşır (filtre öncesi), ayrıca hesaplanmaz.
-Çıktı: faz8_ciktilar/checkpoint/eps_<veri>.npz"""
+"""Faz 8b: raw nearest-neighbour distances for choosing ε (no model training).
+Same splits and same test sample as faz8_metrik; for each split
+  d     test → training nearest-neighbour distance / √dimension
+  d_ic  training sample → training (excluding itself) nearest-neighbour distance / √dimension (natural density scale of the data)
+P3/P4 share the same distances (before filtering) with P2/P0 respectively, so they are not computed separately.
+Output: faz8_ciktilar/checkpoint/eps_<veri>.npz"""
 import os
 import sys
 import time
@@ -14,13 +14,13 @@ import faz8_metrik as M
 from faz7_ortak import log
 from faz7_gpu_modeller import Onisleme, en_yakin
 
-N_IC = 5000      # iç ölçek için eğitim örneklemi
+N_IC = 5000      # training sample for the internal scale
 
 
 def main(ad):
     yol = f"{M.OUT8}/checkpoint/eps_{ad}.npz"
     if os.path.exists(yol):
-        log(ad, "eps zaten var"); return
+        log(ad, "eps already exists"); return
     t0 = time.time()
     X, y, v, ozn = M.veri(ad)
     n = len(y)
@@ -30,7 +30,7 @@ def main(ad):
     for kayit, protokol, tr, te, kat in M.bolmeler8(n, H, v):
         if protokol in ("P3", "P4") or len(te) == 0 or len(tr) == 0:
             continue
-        rs = np.random.RandomState(0)            # faz8_metrik.bolme_degerlendir ile aynı çekiliş sırası
+        rs = np.random.RandomState(0)            # same draw order as faz8_metrik.bolme_degerlendir
         te_s = te if len(te) <= M.N_TE else rs.choice(te, M.N_TE, replace=False)
         tr_nn = tr if len(tr) <= 2_000_000 else rs.choice(tr, 2_000_000, replace=False)
         on = Onisleme().fit(np.asarray(X[rs.choice(tr, min(len(tr), 300_000), replace=False)], dtype=np.float64))
@@ -38,7 +38,7 @@ def main(ad):
         D, _ = en_yakin(Z, on(np.asarray(X[te_s], dtype=np.float64)), k=1, parca_te=2048, parca_tr=500_000)
         ic = np.random.RandomState(1).choice(len(Z), min(N_IC, len(Z)), replace=False)
         Di, Ii = en_yakin(Z, Z[ic], k=2, parca_te=2048, parca_tr=500_000)
-        # kendisi hariç: ilk komşu kendisiyse ikinciyi al (birebir ikiz varsa ilk komşu başka satır olabilir, mesafe yine 0)
+        # excluding itself: if the first neighbour is itself take the second (with an exact twin the first neighbour may be another row, distance still 0)
         d_ic = np.where(Ii[:, 0] == ic, Di[:, 1], Di[:, 0])
         del Z
         out[f"{kayit}__d"] = (D[:, 0] / sq).astype(np.float32)

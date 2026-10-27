@@ -1,4 +1,4 @@
-"""Faz 7 sonuçlarını tek markdown raporunda toplar: faz7_ciktilar/FAZ7_OZET.md (+ birleşik CSV'ler tables/ altında)."""
+"""Collects the Faz 7 results into a single markdown report: faz7_ciktilar/FAZ7_OZET.md (+ combined CSVs under tables/)."""
 import glob
 import os
 import pickle
@@ -33,12 +33,12 @@ def bas(baslik, df, ondalik=4, aciklama=""):
 
 
 def tohum_ort(df, anahtar, cols):
-    """Katlar önce tohum içinde ortalanır; ardından tohumlar arası ortalama ve std."""
+    """Folds are first averaged within each seed; then mean and std across seeds."""
     g = df.groupby(anahtar + ["seed"])[cols].mean()
     return g.groupby(level=list(range(len(anahtar)))).mean(), g.groupby(level=list(range(len(anahtar)))).std()
 
 
-# Q + J — protokoller × 7 model × 3 öznitelik seti × 5 tohum
+# Q + J — protocols × 7 models × 3 feature sets × 5 seeds
 Q, J = ck("Q_*"), ck("J_*")
 A = pd.concat([Q, J], ignore_index=True)
 if len(A):
@@ -55,7 +55,7 @@ if len(A):
     if "test_sizinti" in Q:
         bas("Q — testte içerik ikizi eğitimde bulunan satır payı", Q.groupby("bolme").test_sizinti.mean().to_frame(), 3)
 
-# H — Arumugam yeniden üretimi
+# H — Arumugam reproduction
 H = ck("H_*")
 if len(H):
     H.drop(columns=["secilen"], errors="ignore").to_csv(f"{TAB}/H_arumugam.csv", index=False)
@@ -74,13 +74,13 @@ if len(H):
         z.groupby(["oznitelik", "alt_tur"]).agg(isaretlenen=("isaretlenen_%", "mean"),
                                                en_sik=("en_cok_tahmin", lambda x: x.value_counts().index[0])), 2)
 
-# I — ezber
+# I — memorization
 I = oku("I_ezber.csv")
 bas("I — 1-NN ezber taban çizgisi ve yakın tekrar (tam eğitim kümesi, 2 tohum)",
     None if I is None else I.groupby(["bolme", "oznitelik"])[
         ["icerik_tekrar_%", "yakin_tekrar_0.01_%", "yakin_tekrar_0.1_%", "NN1_F1", "NN1_dogruluk"]].mean(), 3)
 
-# K — kısayol
+# K — shortcut
 K = oku("K_kisayol.csv")
 if K is not None:
     k1 = K[K.kayit.str.startswith("K1")]
@@ -120,4 +120,4 @@ if n is not None and "senaryo" in n:
         n[n.senaryo.notna()].pivot_table(index="senaryo", columns="vektor", values="diger_senaryoda_%"), 2)
 
 open(f"{OUT}/FAZ7_OZET.md", "w", encoding="utf-8").write("# Faz 7 — sonuç özeti (otomatik)\n" + "".join(parca))
-print("yazıldı:", f"{OUT}/FAZ7_OZET.md")
+print("written:", f"{OUT}/FAZ7_OZET.md")

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Faz 7 ikinci kuyruk: IoT-23 (N) bitince bellek yoğun R ölçümleri (MedBIoT, Engelen CICIDS2017, Kitsune) sırayla.
+# Phase 7 second queue: when IoT-23 (N) finishes, the memory-intensive R measurements (MedBIoT, Engelen CICIDS2017, Kitsune) run in sequence.
 cd "$(dirname "$0")"
 L=faz7_ciktilar/logs
 while pgrep -f faz7_N_iot23.py > /dev/null; do sleep 30; done

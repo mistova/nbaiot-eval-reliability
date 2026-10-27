@@ -1,5 +1,5 @@
-"""Makale tabloları: sonuç dosyalarından LaTeX gövdeleri üretir (elle aktarma hatasını önlemek için).
-Çıktı: makale/tablolar/*.tex (yalnızca tabular satırları; başlık ve çerçeve main.tex içinde)."""
+"""Paper tables: generates LaTeX bodies from the result files (to avoid manual transcription errors).
+Output: makale/tablolar/*.tex (tabular rows only; caption and frame are in main.tex)."""
 import os
 
 import numpy as np
@@ -16,14 +16,14 @@ SIRA = ["nbaiot", "nbaiot_temiz", "botiot", "iot23", "cicids2017", "cicids2017_e
 
 def yaz(ad, satirlar):
     open(f"{OUT}/{ad}.tex", "w").write("\n".join(satirlar) + "\n")
-    print(ad, len(satirlar), "satır")
+    print(ad, len(satirlar), "rows")
 
 
 def f(x, n=3):
     return "--" if pd.isna(x) else f"{x:.{n}f}"
 
 
-# ---------------------------------------------------------------- tekillik (gafgyt tcp/udp, üç tanım)
+# ---------------------------------------------------------------- uniqueness (gafgyt tcp/udp, three definitions)
 a1 = pd.read_csv(f"{K}/faz6_ciktilar/tables/A1_dosya_tekillik.csv")
 s = []
 for tur in ("tcp", "udp"):
@@ -40,7 +40,7 @@ diger = a1[(a1.aile != "benign") & ~((a1.aile == "gafgyt") & a1.tur.isin(["tcp",
 s.append(f"other 8 attacks & {diger.satir.sum():,} & \\multicolumn{{3}}{{c}}{{100\\% unique under all three definitions}} \\\\")
 yaz("t_tekillik", [x.replace(",", "{,}") if False else x for x in s])
 
-# ---------------------------------------------------------------- zaman damgalı satır payı
+# ---------------------------------------------------------------- share of timestamped rows
 b1 = pd.read_csv(f"{K}/faz6_ciktilar/tables/B1_zd_sutunlar.csv").set_index("oznitelik")
 m = b1.loc[[i for i in b1.index if i.endswith("_mean")]].max()
 v = b1.loc[[i for i in b1.index if i.endswith("_variance")]].max()
@@ -50,7 +50,7 @@ for c in b1.columns:
     s.append(f"{c.replace(':', ' ')} & {u.loc[c, 'm']:.2f} & {u.loc[c, 'v']:.2f} & {u.loc[c, 'u']:.2f} \\\\")
 yaz("t_zamandamgasi", s)
 
-# ---------------------------------------------------------------- cihazlar arası ortaklık (içerik tanımı)
+# ---------------------------------------------------------------- cross-device overlap (content definition)
 a3 = pd.read_csv(f"{K}/faz6_ciktilar/tables/A3_cihazlar_arasi.csv")
 KUME = {"Danmini_Doorbell": 1, "Philips_B120N10_Baby_Monitor": 1, "Ecobee_Thermostat": 2,
         "SimpleHome_XCS7_1002_WHT_Security_Camera": 2, "SimpleHome_XCS7_1003_WHT_Security_Camera": 2,
@@ -65,7 +65,7 @@ for sinif, g in a3.groupby("sinif"):
         s.append(f"{sinif.replace(':', ' ')} & {len(g)} & {x[ayni].min():.1f}--{x[ayni].max():.1f} & -- & {x[~ayni].max():.1f} \\\\")
 yaz("t_cihazlar", s)
 
-# ---------------------------------------------------------------- profil
+# ---------------------------------------------------------------- profile
 p = pd.read_csv(f"{K}/faz8_ciktilar/tables/faz8_profil.csv")
 s = []
 for vv in SIRA:
@@ -78,7 +78,7 @@ for vv in SIRA:
              f"{gs:.3f} & {k.protokol} & {k.tau_e_01:.2f} & {h.tau_e_01 - k.tau_e_01:.2f} & {h.F1:.3f} & {h.sisme:+.3f} \\\\")
 yaz("t_profil", s)
 
-# ---------------------------------------------------------------- geçerlilik (ε adayları, seçilmiş satırlar)
+# ---------------------------------------------------------------- validity (ε candidates, selected rows)
 A = pd.read_csv(f"{K}/faz8_ciktilar/tables/faz8_eps_adaylar.csv")
 A["e"] = A.aday.str.extract(r"=\s*([0-9.e-]+)").astype(float)
 s = []
@@ -91,7 +91,7 @@ for aile, e in (("sabit", 0.001), ("sabit", 0.01), ("sabit", 0.0562), ("sabit", 
              f"{r.C5_kararsizlik:.3f} & {r['TOPSIS_eşit']:.3f} & {sira} \\\\")
 yaz("t_eps", s)
 
-# ---------------------------------------------------------------- bozma özeti
+# ---------------------------------------------------------------- corruption summary
 d = pd.read_csv(f"{K}/faz8_ciktilar/tables/faz8c_bozma.csv")
 KOS = [("taban", 0, "none"), ("gurultu", 0.01, "noise $\\sigma=0.01$"), ("gurultu", 0.05, "noise $\\sigma=0.05$"),
        ("nicem", 2, "2 significant digits"), ("seyrelt", 16, "every 16th row"), ("boyut", 0.25, "25\\% of features")]

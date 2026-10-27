@@ -1,10 +1,10 @@
-"""Faz 7 L — zaman damgası artefaktının kaynağı: Kitsune/AfterImage çıkarıcısı (iddia 10, açık soru init_time).
+"""Phase 7 L - source of the timestamp artifact: the Kitsune/AfterImage extractor (claim 10, open question init_time).
 
-1) Yayımlanmış Kitsune Network Attack Dataset (UCI 516; Mirsky ve ark. 2018) öznitelik dosyalarında HH_jit_*_mean
-   sütunlarında ~1,5e9 (mutlak zaman) değeri var mı, hangi satırlarda (yeni akışın ilk paketi mi)?
-2) Aynı pcap'in ilk N paketinden yayımlanmış Kitsune-py ile (init_time = t) ve tek satırlık değişiklikle
-   (init_time = 0) öznitelik çıkar; hangisi yayımlanmış özniteliklerle örtüşüyor?
-Kullanım: python3 faz7_L_kitsune.py [N]
+1) Do the HH_jit_*_mean columns in the published Kitsune Network Attack Dataset (UCI 516; Mirsky et al. 2018) feature
+   files contain ~1.5e9 (absolute time) values, and in which rows (the first packet of a new flow?)
+2) From the first N packets of the same pcap, extract features with the published Kitsune-py (init_time = t) and with a
+   one-line change (init_time = 0); which one matches the published features?
+Usage: python3 faz7_L_kitsune.py [N]
 """
 import glob
 import gzip
@@ -18,7 +18,7 @@ import numpy as np
 KIT = os.path.expanduser("~/work/IoT_Botnet/kaynak_kod/Kitsune-py")
 VERI = os.path.expanduser("~/work/IoT_Botnet/veri/kitsune/ac")
 sys.path.insert(0, KIT)
-np.Inf = np.inf   # Kitsune-py NumPy 1 sözdizimi kullanıyor (alt modül değiştirilmeden)
+np.Inf = np.inf   # Kitsune-py uses NumPy 1 syntax (without modifying the submodule)
 
 
 def cikarici(init_sifir):
@@ -26,7 +26,7 @@ def cikarici(init_sifir):
     import netStat as ns
     if init_sifir:
         def update(self, ID, t, v, Lambda=1, isTypeDiff=False):
-            incS = self.register(ID, Lambda, 0, isTypeDiff)   # tek fark: init_time = 0
+            incS = self.register(ID, Lambda, 0, isTypeDiff)   # the only difference: init_time = 0
             incS.insert(v, t)
             return incS
     else:
@@ -70,7 +70,7 @@ def paketler(pcap, N):
 
 
 def eslestir(kp_basliklar, ozn):
-    """Kitsune-py başlığı → yayımlanmış (N-BaIoT düzeni, 115) sütun indeksi ve dönüşüm (1D 'std' yayımlanmışta 'variance')."""
+    """Kitsune-py header -> published (N-BaIoT layout, 115) column index and transform (1D 'std' is 'variance' in the published data)."""
     import re
     out = []
     for j, h in enumerate(kp_basliklar):
@@ -86,12 +86,12 @@ def eslestir(kp_basliklar, ozn):
 def main(N):
     import netStat as ns
     from faz7_ortak import yukle
-    _, _, ozn = yukle()                      # yayımlanmış Kitsune dosyaları N-BaIoT ile aynı 115 sütun düzeninde
+    _, _, ozn = yukle()                      # published Kitsune files have the same 115-column layout as N-BaIoT
     kp = ns.netStat().getNetStatHeaders()
     es = eslestir(kp, ozn)
     jm = [ozn.index(c) for c in ozn if c.startswith("HH_jit_") and c.endswith("_mean")]
     jv = [ozn.index(c) for c in ozn if c.startswith("HH_jit_") and c.endswith("_variance")]
-    log("eşleşen sütun:", len(es), "/", len(kp))
+    log("matched columns:", len(es), "/", len(kp))
     rows = []
     for d in sorted(glob.glob(f"{VERI}/*/")):
         ad = os.path.basename(d.rstrip("/"))
@@ -99,7 +99,7 @@ def main(N):
         if not fx:
             continue
         Xp = pd.read_csv(fx[0], header=None, nrows=max(N, 1_000_000)).to_numpy(np.float64)
-        if Xp.shape[1] == 116:               # Mirai dosyasında baştaki sıra numarası sütunu
+        if Xp.shape[1] == 116:               # in the Mirai file, a leading row-number column
             Xp = Xp[:, 1:]
         r = {"saldiri": ad, "satir_okunan": len(Xp), "sutun": Xp.shape[1],
              "jit_mean_zd_satir_%": 100 * float((Xp[:, jm] > 1e9).any(1).mean()),
@@ -128,7 +128,7 @@ def main(N):
                 log(ad, k, {kk: vv for kk, vv in r.items() if kk.startswith(k)})
         rows.append(r); log(r)
         pd.DataFrame(rows).to_csv(f"{TAB}/L_kitsune.csv", index=False)
-    log("L bitti")
+    log("L done")
 
 
 if __name__ == "__main__":

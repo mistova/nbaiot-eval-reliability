@@ -1,14 +1,14 @@
-"""N-BaIoT: HH_jit_*_mean özniteliklerindeki zaman damgası artefaktı.
+"""N-BaIoT: timestamp artifact in the HH_jit_*_mean features.
 
-Bazı satırlarda HH_jit_*_mean değeri ~1.5e9, yani Unix zaman damgası (saniye).
-Her (cihaz, saldırı türü) dosyası için şunları raporlar:
-  - zd_pay_%       : HH_jit_L5_mean > 1e9 olan satırların payı
-  - baskin_zd      : en sık değer ve UTC karşılığı
-  - baskin_pay_%   : en sık satır vektörünün dosyadaki payı (float64, 115 öznitelik)
+In some rows the HH_jit_*_mean value is ~1.5e9, i.e. a Unix timestamp (seconds).
+For each (device, attack type) file it reports:
+  - zd_pay_%       : share of rows with HH_jit_L5_mean > 1e9
+  - baskin_zd      : most frequent value and its UTC equivalent
+  - baskin_pay_%   : share of the most frequent row vector in the file (float64, 115 features)
 
-Ek olarak gafgyt tcp/udp baskın vektörlerinin farkını yazar.
-Çıktı: veri/nbaiot_denetim/tablo6_jitter_zaman.csv, tablo7_tcp_udp_baskin_fark.csv
-Eğitim yok; yalnızca CSV okuma.
+It also writes the difference between the gafgyt tcp/udp dominant vectors.
+Output: veri/nbaiot_denetim/tablo6_jitter_zaman.csv, tablo7_tcp_udp_baskin_fark.csv
+No training; CSV reading only.
 """
 import datetime as dt
 import pathlib

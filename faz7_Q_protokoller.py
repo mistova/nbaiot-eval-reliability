@@ -1,9 +1,8 @@
-"""Faz 7 Q — Faz 6 D'nin genişletilmesi (CPU: RF, HistGB).
+"""Faz 7 Q — Extension of Faz 6 D (CPU: RF, HistGB).
 
-Yenilikler: S6 (500 satırlık blok ayrık bölme, Arumugam 2026) ve S6f; yalnız 5 zaman damgası sütununun
-çıkarıldığı 'zd_yok_110' seti; 5 tohum; tüm sınıflar için geri çağırma; test satırlarının eğitimde
-içerik olarak bulunma oranı.
-Kullanım: python3 faz7_Q_protokoller.py <tohum>
+New: S6 (disjoint 500-row block split, Arumugam 2026) and S6f; the 'zd_yok_110' set with only the 5 timestamp
+columns removed; 5 seeds; recall for all classes; share of test rows found in training as content.
+Usage: python3 faz7_Q_protokoller.py <seed>
 """
 import sys
 import time
@@ -65,8 +64,8 @@ def main(seed):
                 r["sure_s"] = round(time.time() - t0, 1)
                 SON.append(r)
                 ck_yaz(ad, SON)
-                log(b, k, mad, oad, seed, f"MCC={r['MCC_ikili']:.4f} F1={r['F1_makro_cok']:.4f} siz={sizinti:.3f} ({r['sure_s']}s)")
-    log(f"Q tohum {seed} bitti: {len(SON)} satır")
+                log(b, k, mad, oad, seed, f"MCC={r['MCC_ikili']:.4f} F1={r['F1_makro_cok']:.4f} leak={sizinti:.3f} ({r['sure_s']}s)")
+    log(f"Q seed {seed} bitti: {len(SON)} rows")
 
 
 if __name__ == "__main__":

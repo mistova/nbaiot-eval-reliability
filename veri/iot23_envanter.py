@@ -1,14 +1,14 @@
 """
-IoT-23 envanter cikarimi.
+IoT-23 inventory extraction.
 
-Kullanim:
+Usage:
     cd ~/work/IoT_Botnet/veri
     python3 iot23_envanter.py
 
-Her senaryodan ilk ORNEK satiri tarar ve su sorulari cevaplar:
-  - Kac farkli kaynak IP var? (cihaz kimligi anlamli mi)
-  - Iyi huylu / kotu huylu dengesi nasil?
-  - Temiz taban cizgisi kurulabilecek IP var mi?
+Scans the first ORNEK rows of each scenario and answers these questions:
+  - How many distinct source IPs are there? (is the device identity meaningful)
+  - How is the benign / malicious balance?
+  - Is there any IP on which a clean baseline can be built?
 """
 
 import os
@@ -16,16 +16,16 @@ import glob
 import json
 import collections
 
-ORNEK = 300_000          # senaryo basina taranacak satir
-MIN_BENIGN = 1000        # temiz taban cizgisi icin gereken en az benign akis
-MIN_ORAN = 0.5           # ve benign orani bu esigin uzerinde olmali
+ORNEK = 300_000          # rows to scan per scenario
+MIN_BENIGN = 1000        # minimum benign flows needed for a clean baseline
+MIN_ORAN = 0.5           # and the benign ratio must exceed this threshold
 
 
 def parcala(satir, n_alan):
-    """Zeek satirini alanlara ayirir.
+    """Splits a Zeek line into fields.
 
-    Son uc alan (tunnel_parents, label, detailed-label) bazi
-    surumlerde sekme yerine bosluk ile ayrilmis oluyor.
+    The last three fields (tunnel_parents, label, detailed-label) are
+    separated by spaces instead of tabs in some versions.
     """
     p = satir.rstrip("\n").split("\t")
     if len(p) >= n_alan:
@@ -93,8 +93,8 @@ def main():
     if not dosyalar:
         raise SystemExit("conn.log.labeled bulunamadi. Dogru klasorde misiniz?")
 
-    print(f"{len(dosyalar)} senaryo taraniyor "
-          f"(senaryo basina en fazla {ORNEK:,} satir)\n")
+    print(f"{len(dosyalar)} scenarios being scanned "
+          f"(at most {ORNEK:,} rows per scenario)\n")
 
     basliklar = ("Senaryo", "Satir", "IP", "Benign", "Malicious", "Temiz")
     print("{:<34}{:>10}{:>7}{:>11}{:>11}{:>7}".format(*basliklar))
@@ -122,19 +122,19 @@ def main():
             len(r["temiz_ip"]),
         ))
 
-    print(f"\nAyristirilamayan satir: {toplam_hatali:,}")
+    print(f"\nUnparseable rows: {toplam_hatali:,}")
 
-    print("\nGenel etiket dagilimi:")
+    print("\nOverall label distribution:")
     for k, v in genel_etiket.most_common():
         print(f"  {v:>12,}  {k}")
 
-    print("\nAyrintili etiket dagilimi:")
+    print("\nDetailed label distribution:")
     for k, v in genel_detay.most_common(20):
         print(f"  {v:>12,}  {k}")
 
     print("\n" + "=" * 70)
-    print("  TEMIZ TABAN CIZGISI KURULABILECEK IP'LER")
-    print(f"  (>= {MIN_BENIGN} benign akis ve benign orani > %{int(MIN_ORAN*100)})")
+    print("  IPs ON WHICH A CLEAN BASELINE CAN BE BUILT")
+    print(f"  (>= {MIN_BENIGN} benign flows and benign ratio > %{int(MIN_ORAN*100)})")
     print("=" * 70)
     bulundu = False
     for ad, r in ozet.items():
@@ -145,14 +145,14 @@ def main():
                 print(f"    {ip:<18} benign={b:>8,}  toplam={t:>8,}  "
                       f"(%{100*b/t:.1f})")
     if not bulundu:
-        print("\n  HICBIRI YOK.")
-        print("  IoT-23'te cihaz basina temiz taban cizgisi kurulamiyor.")
-        print("  -> Kisisellestirme analizi (RQ1-RQ4) bu veri setinde")
-        print("     tekrarlanamaz; destekleyici role duser.")
+        print("\n  NONE.")
+        print("  No per-device clean baseline can be built in IoT-23.")
+        print("  -> The personalization analysis (RQ1-RQ4) cannot be")
+        print("     replicated on this dataset; it falls to a supporting role.")
 
-    # ilk senaryonun alan listesini goster
+    # show the field list of the first scenario
     ilk = next(iter(ozet.values()))
-    print(f"\nZeek alanlari ({len(ilk['alanlar'])}):")
+    print(f"\nZeek fields ({len(ilk['alanlar'])}):")
     print("  " + ", ".join(ilk["alanlar"]))
 
     cikti = {
@@ -161,7 +161,7 @@ def main():
     }
     with open("iot23_envanter.json", "w") as fh:
         json.dump(cikti, fh, indent=2, ensure_ascii=False, default=str)
-    print("\nAyrintili cikti: iot23_envanter.json")
+    print("\nDetailed output: iot23_envanter.json")
 
 
 if __name__ == "__main__":

@@ -1,12 +1,12 @@
 """
-N-BaIoT veri seti denetimi: yinelenme, siniflar arasi ve cihazlar arasi cakisma.
+N-BaIoT dataset audit: duplication, overlap across classes and across devices.
 
-Kullanim:
+Usage:
     cd ~/work/IoT_Botnet/veri
     python3 nbaiot_denetim.py
 
-Cikti:
-    nbaiot_denetim/  klasorunde CSV tablolari ve ozet.json
+Output:
+    CSV tables and ozet.json in the nbaiot_denetim/ folder
 """
 
 import os
@@ -31,17 +31,17 @@ def bilgi(yol):
 
 
 def satir_ozetleri(df):
-    """Her satir icin 64 bitlik ozet (hash). Esit satirlar esit ozet verir."""
+    """64-bit digest (hash) for each row. Equal rows give equal digests."""
     return pd.util.hash_pandas_object(df, index=False).to_numpy()
 
 
 def main():
     dosyalar = sorted(glob.glob(f"{KOK}/**/*.csv", recursive=True))
     dosyalar = [f for f in dosyalar if "demonstrate" not in f]
-    print(f"{len(dosyalar)} dosya denetleniyor\n")
+    print(f"{len(dosyalar)} files being audited\n")
 
     t0 = time.time()
-    ozetler = {}          # (cihaz, aile, tur) -> tekil hash kumesi
+    ozetler = {}          # (device, family, type) -> set of unique hashes
     satirlar = []
 
     for f in dosyalar:
@@ -61,19 +61,19 @@ def main():
             "en_sik_pay_%": round(100 * adet.max() / len(df), 3),
         })
         print(f"  {cihaz[:30]:<32}{aile:<8}{tur:<10}"
-              f"{len(df):>9,} satir  {len(tekil):>8,} tekil  "
+              f"{len(df):>9,} rows  {len(tekil):>8,} unique  "
               f"(%{100*len(tekil)/len(df):.2f})")
 
-    print(f"\nOkuma suresi: {time.time()-t0:.0f} s")
+    print(f"\nReading time: {time.time()-t0:.0f} s")
 
     # ---------------------------------------------------------------
-    # 1. Dosya bazli yinelenme
+    # 1. Per-file duplication
     # ---------------------------------------------------------------
     tablo1 = pd.DataFrame(satirlar)
     tablo1.to_csv(f"{CIKTI}/tablo1_dosya_yinelenme.csv", index=False)
 
     print("\n" + "=" * 72)
-    print("  1. SALDIRI TURU BAZINDA ORTALAMA TEKILLIK")
+    print("  1. MEAN UNIQUENESS PER ATTACK TYPE")
     print("=" * 72)
     oz = (tablo1.groupby(["aile", "tur"])
           .agg(cihaz=("cihaz", "nunique"),
@@ -87,16 +87,16 @@ def main():
     oz.to_csv(f"{CIKTI}/tablo2_tur_ozeti.csv", index=False)
 
     sorunlu = oz[oz.ort_tekillik < 10]
-    print(f"\nTekillik %10'un altinda olan tur sayisi: {len(sorunlu)}")
+    print(f"\nNumber of types with uniqueness below 10%: {len(sorunlu)}")
     for _, r in sorunlu.iterrows():
-        print(f"  {r.aile}:{r.tur}  -> {r.toplam_satir:,} satirin "
-              f"yalnizca {r.toplam_tekil:,}'i tekil")
+        print(f"  {r.aile}:{r.tur}  -> {r.toplam_satir:,} rows, "
+              f"only {r.toplam_tekil:,} unique")
 
     # ---------------------------------------------------------------
-    # 2. Ayni cihazda turler arasi cakisma
+    # 2. Overlap across types on the same device
     # ---------------------------------------------------------------
     print("\n" + "=" * 72)
-    print("  2. AYNI CIHAZDA TURLER ARASI CAKISMA")
+    print("  2. OVERLAP ACROSS TYPES ON THE SAME DEVICE")
     print("=" * 72)
     cakisma = []
     cihazlar = sorted({k[0] for k in ozetler})
@@ -121,16 +121,16 @@ def main():
     t3 = pd.DataFrame(cakisma)
     t3.to_csv(f"{CIKTI}/tablo3_turler_arasi_cakisma.csv", index=False)
     if t3.empty:
-        print("  Cakisma yok.")
+        print("  No overlap.")
     else:
         print(t3.sort_values("ortak_tekil", ascending=False)
               .head(25).to_string(index=False))
 
     # ---------------------------------------------------------------
-    # 3. Iyi huylu ile saldiri arasinda birebir ayni satir var mi?
+    # 3. Are there exactly identical rows between benign and attack?
     # ---------------------------------------------------------------
     print("\n" + "=" * 72)
-    print("  3. IYI HUYLU <-> SALDIRI BIREBIR CAKISMASI  (en ciddi durum)")
+    print("  3. BENIGN <-> ATTACK EXACT OVERLAP  (most serious case)")
     print("=" * 72)
     ib = []
     for c in cihazlar:
@@ -147,17 +147,17 @@ def main():
     t4.to_csv(f"{CIKTI}/tablo4_iyi_saldiri_cakisma.csv", index=False)
     bulunan = t4[t4.ortak_tekil > 0]
     if bulunan.empty:
-        print("  Iyi huylu ve saldiri satirlari arasinda birebir cakisma YOK.")
+        print("  There is NO exact overlap between benign and attack rows.")
     else:
-        print(f"  {len(bulunan)} cihaz-tur ciftinde cakisma bulundu:\n")
+        print(f"  Overlap found in {len(bulunan)} device-type pairs:\n")
         print(bulunan.sort_values("ortak_tekil", ascending=False)
               .to_string(index=False))
 
     # ---------------------------------------------------------------
-    # 4. Cihazlar arasi cakisma (ayni saldiri turu)
+    # 4. Overlap across devices (same attack type)
     # ---------------------------------------------------------------
     print("\n" + "=" * 72)
-    print("  4. CIHAZLAR ARASI CAKISMA (ayni saldiri turu)")
+    print("  4. OVERLAP ACROSS DEVICES (same attack type)")
     print("=" * 72)
     ca = []
     turler = sorted({(k[1], k[2]) for k in ozetler if k[1] != "benign"})
@@ -174,24 +174,24 @@ def main():
     t5 = pd.DataFrame(ca)
     t5.to_csv(f"{CIKTI}/tablo5_cihazlar_arasi_cakisma.csv", index=False)
     if t5.empty:
-        print("  Cihazlar arasi cakisma yok.")
+        print("  No overlap across devices.")
     else:
         print(t5.groupby("tur").ortak_tekil.agg(["count", "sum"])
               .to_string())
 
     # ---------------------------------------------------------------
-    # 5. Etkin orneklem buyuklugu
+    # 5. Effective sample size
     # ---------------------------------------------------------------
     print("\n" + "=" * 72)
-    print("  5. ETKIN ORNEKLEM BUYUKLUGU")
+    print("  5. EFFECTIVE SAMPLE SIZE")
     print("=" * 72)
     sal = tablo1[tablo1.aile != "benign"]
     iyi = tablo1[tablo1.aile == "benign"]
-    print(f"  Saldiri : {sal.satir.sum():>12,} satir   ->   "
-          f"{sal.tekil.sum():>10,} tekil   "
+    print(f"  Attack  : {sal.satir.sum():>12,} rows    ->   "
+          f"{sal.tekil.sum():>10,} unique  "
           f"(%{100*sal.tekil.sum()/sal.satir.sum():.2f})")
-    print(f"  Iyi hl. : {iyi.satir.sum():>12,} satir   ->   "
-          f"{iyi.tekil.sum():>10,} tekil   "
+    print(f"  Benign  : {iyi.satir.sum():>12,} rows    ->   "
+          f"{iyi.tekil.sum():>10,} unique  "
           f"(%{100*iyi.tekil.sum()/iyi.satir.sum():.2f})")
 
     ozet = {
@@ -208,7 +208,7 @@ def main():
     with open(f"{CIKTI}/ozet.json", "w") as fh:
         json.dump(ozet, fh, indent=2, ensure_ascii=False)
     print("\n" + json.dumps(ozet, indent=2, ensure_ascii=False))
-    print(f"\nTum ciktilar: {CIKTI}/")
+    print(f"\nAll outputs: {CIKTI}/")
 
 
 if __name__ == "__main__":

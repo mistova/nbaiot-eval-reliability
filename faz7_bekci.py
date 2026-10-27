@@ -1,6 +1,6 @@
-"""Faz 7 bellek bekçisi: kullanılabilir RAM eşiğin altına düşerse en çok bellek tutan faz7 sürecini sonlandırır.
-Sonlandırılan iş checkpoint'li olduğu için çalıştırıcının ikinci turunda kaldığı yerden devam eder.
-Her 5 dakikada bir bellek/GPU özeti yazar. Kullanım: python3 faz7_bekci.py  (arka planda)"""
+"""Phase 7 memory watchdog: if available RAM drops below the threshold, kills the faz7 process holding the most memory.
+The killed job is checkpointed, so it resumes where it left off in the runner's second pass.
+Writes a memory/GPU summary every 5 minutes. Usage: python3 faz7_bekci.py  (in the background)"""
 import os
 import signal
 import subprocess
@@ -11,8 +11,8 @@ LOG = os.path.expanduser("~/work/IoT_Botnet/faz7_ciktilar/logs/bekci.log")
 
 
 def kullanilabilir_gb():
-    """Konteynerin cgroup sınırına göre kalan bellek (anon + kernel; geri alınabilir sayfa önbelleği hariç).
-    Makinede 122 GB olsa da konteyner sınırı daha düşük (memory.max ≈ 92 GB); /proc/meminfo bunu göstermez."""
+    """Remaining memory according to the container cgroup limit (anon + kernel; excluding reclaimable page cache).
+    Even though the machine has 122 GB, the container limit is lower (memory.max ~ 92 GB); /proc/meminfo does not show this."""
     try:
         sinir = int(open("/sys/fs/cgroup/memory.max").read())
         st = dict(l.split() for l in open("/sys/fs/cgroup/memory.stat"))

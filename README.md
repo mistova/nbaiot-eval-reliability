@@ -4,7 +4,9 @@ This repository contains the analysis code and the raw result tables (CSV/JSON) 
 audit of how evaluation protocols interact with dataset properties on N-BaIoT and seven other
 network-traffic datasets, together with an evaluation-reliability profile.
 
-> The accompanying manuscript is under review. Code comments and table column names are in Turkish.
+> The accompanying manuscript is under review. Comments, docstrings and printed messages are in English;
+> identifiers, file names and table column names are Turkish so that the released tables match the code
+> exactly. [GLOSSARY.md](GLOSSARY.md) translates them.
 
 ## Manuscript ↔ code
 

@@ -1,17 +1,17 @@
-"""Faz 8b: ε seçimi — çok ölçütlü karar desteği (TOPSIS) ve iç içe bir-veri-seti-dışarıda sınama.
-Girdi: tables/faz8_profil.csv (şişme), checkpoint/eps_<veri>.npz (faz8_eps.py)
-Çıktı: faz8_ciktilar/FAZ8_EPS.md, tables/faz8_eps_adaylar.csv, tables/faz8_eps_icice.csv
+"""Faz 8b: ε selection — multi-criteria decision support (TOPSIS) and nested leave-one-dataset-out test.
+Input: tables/faz8_profil.csv (inflation), checkpoint/eps_<veri>.npz (faz8_eps.py)
+Output: faz8_ciktilar/FAZ8_EPS.md, tables/faz8_eps_adaylar.csv, tables/faz8_eps_icice.csv
 
-Adaylar
-  sabit       ε ∈ 10^[-4, 0], 17 değer: τ = pay(d ≤ ε)
-  uyarlamalı  c ∈ 10^[-1, 1], 9 değer:  τ = pay(d ≤ c · s), s = bölmenin eğitim içi komşu mesafesi medyanı
-              (sıfır olmayanlar; birebir tekrar yoğun veride medyan 0 olacağından)
-Ölçütler (aday başına, verilen veri seti kümesinde hesaplanır)
-  C1 veri setleri arası Spearman(τ, şişme)                       fayda
-  C2 veri seti içi Spearman (veri ortalaması çıkarılmış)          fayda
-  C3 küme içinde bir veri seti çıkarılınca en düşük C1            fayda
-  C4 τ'nun noktalar arası standart sapması (doyma yok)            fayda
-  C5 aynı ailede komşu adaylara göre |ΔC1| ortalaması (plato)     maliyet"""
+Candidates
+  sabit       ε ∈ 10^[-4, 0], 17 values: τ = share(d ≤ ε)
+  uyarlamalı  c ∈ 10^[-1, 1], 9 values:  τ = share(d ≤ c · s), s = median within-training neighbour distance of the split
+              (nonzero ones only; since the median would be 0 on data dense with exact duplicates)
+Criteria (per candidate, computed on the given set of datasets)
+  C1 Spearman(τ, inflation) across datasets                          benefit
+  C2 within-dataset Spearman (dataset mean subtracted)                benefit
+  C3 lowest C1 when one dataset is removed from the set               benefit
+  C4 standard deviation of τ across points (no saturation)            benefit
+  C5 mean |ΔC1| versus neighbouring candidates in the same family (plateau)   cost"""
 import os
 import sys
 
@@ -31,9 +31,9 @@ AGIRLIK = {"eşit": np.ones(5) / 5, "korelasyon ağırlıklı": np.array([0.35, 
 
 prof = pd.read_csv(f"{TAB}/faz8_profil.csv")
 G = prof[(prof.n_te_eff >= MIN_TEST) & prof.sisme.notna() & (prof.protokol != "P3")].reset_index(drop=True)
-KAYNAK = {"P0": "P0", "P4": "P0", "P1": "P1", "P2": "P2"}   # P4 filtre öncesi P0 ile aynı mesafeler
+KAYNAK = {"P0": "P0", "P4": "P0", "P1": "P1", "P2": "P2"}   # P4 has the same distances as P0 before filtering
 
-# her nokta için mesafe dizileri (P2: varlık katlarının listesi)
+# distance arrays for each point (P2: list of entity folds)
 mes = {}
 for v in G.veri.unique():
     z = np.load(f"{OUT}/checkpoint/eps_{v}.npz")
@@ -56,7 +56,7 @@ def tau(v, p, aile, deger):
 
 
 ADAY = [("sabit", e) for e in SABIT] + [("uyarlamalı", c) for c in UYAR]
-T = np.array([[tau(v, p, a, e) for a, e in ADAY] for v, p in zip(G.veri, G.protokol)])   # nokta × aday
+T = np.array([[tau(v, p, a, e) for a, e in ADAY] for v, p in zip(G.veri, G.protokol)])   # point × candidate
 
 
 def sp(x, y):
@@ -119,8 +119,8 @@ parca.append(f"\n## Tüm veri setleriyle aday tablosu ({len(G)} nokta, {G.veri.n
              + A.sort_values("TOPSIS_eşit", ascending=False).round(3).to_markdown(index=False) + "\n")
 parca.append("\nEntropi ağırlıkları: " + ", ".join(f"C{i + 1} {w:.2f}" for i, w in enumerate(entropi_agirlik(C))) + "\n")
 
-# iç içe sınama: dışarıdaki veri seti için ε diğerlerinden seçilir
-# aynı verinin iki hali (öznitelik seti / yeniden etiketleme) birlikte dışarıda bırakılır
+# nested test: ε for the held-out dataset is chosen from the others
+# two versions of the same data (feature set / relabelling) are left out together
 AILE = {"nbaiot_temiz": "nbaiot", "cicids2017_engelen": "cicids2017"}
 G["aile"] = G.veri.map(lambda v: AILE.get(v, v))
 sat, tah = [], np.full(len(G), np.nan)
@@ -141,10 +141,10 @@ parca.append("\n## İç içe sınama (ε dışarıdaki veri ailesi görülmeden 
 parca.append(f"\nDışarıda seçilmiş ε ile birleştirilmiş noktalar: veri setleri arası Spearman = {r_ic:.3f} (p = {p_ic:.3g}); "
              f"veri seti içi Spearman = {r_ic2:.3f} (p = {p_ic2:.3g}); n = {len(G)}.\n")
 
-# karşılaştırma: önceden seçilmiş ε = 0,01
+# comparison: pre-selected ε = 0.01
 j01 = int(np.argmin([abs(e - 0.01) if a == "sabit" else 9 for a, e in ADAY]))
 parca.append(f"\nKarşılaştırma — önceden seçilen ε = 0,01: C1 = {C[j01, 0]:.3f}, C2 = {C[j01, 1]:.3f}.\n")
-# veri seti başına en iyi sabit ε (veri seti içi, protokoller arası) ve veri seti özellikleri — ε uyarlama rehberi için
+# best fixed ε per dataset (within dataset, across protocols) and dataset properties — for the ε adaptation guide
 ozel = []
 for v, g in G.groupby("veri"):
     idx = g.index.values

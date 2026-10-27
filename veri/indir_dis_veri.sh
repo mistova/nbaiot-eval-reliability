@@ -1,7 +1,7 @@
 #!/bin/bash
-# Kitsune (UCI) ve MedBIoT (TalTech, fine-grained) indirme.
-# UCI aralıklı (Range) isteği desteklemediği için Kitsune her denemede baştan indirilir ve zip bütünlüğü sınanır.
-# MedBIoT dosyaları kaldığı yerden devam eder; tamamlanan dosyalar atlanır.
+# Download of Kitsune (UCI) and MedBIoT (TalTech, fine-grained).
+# UCI does not support Range requests, so Kitsune is downloaded from scratch on every attempt and the zip integrity is tested.
+# MedBIoT files resume where they left off; completed files are skipped.
 cd ~/work/IoT_Botnet/veri
 mkdir -p kitsune
 
@@ -10,7 +10,7 @@ for t in 1 2 3 4 5 6; do
   curl -sfL --retry 3 --speed-limit 20000 --speed-time 90 -o kitsune/kitsune.zip \
     "https://archive.ics.uci.edu/static/public/516/kitsune+network+attack+dataset.zip" \
     && unzip -tq kitsune/kitsune.zip > /dev/null && { echo "kitsune tamam $(date +%T)"; break; }
-  echo "kitsune deneme $t başarısız $(date +%T)"; sleep 30
+  echo "kitsune attempt $t failed $(date +%T)"; sleep 30
 done
 
 B=https://cs.taltech.ee/research/data/medbiot/fine-grained

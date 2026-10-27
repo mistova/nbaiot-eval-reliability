@@ -1,5 +1,5 @@
-"""Faz 7 GPU modelleri (torch + XGBoost cuda): MLP, softmax regresyon (LR), kNN; ve ortak ön işleme.
-Girdi her zaman işaretli log1p + eğitim istatistikleriyle standartlaştırma (zaman damgası ve 1e21 büyüklükleri için)."""
+"""Phase 7 GPU models (torch + XGBoost cuda): MLP, softmax regression (LR), kNN; and shared preprocessing.
+Input is always signed log1p + standardization with training statistics (for timestamps and 1e21 magnitudes)."""
 import numpy as np
 import torch
 
@@ -21,7 +21,7 @@ def _tensor(a):
 
 
 def sinir_agi(Xtr, ytr, n_sinif, gizli=(256, 128), epok=15, seed=0, lr=1e-3, bs=4096):
-    """gizli=() → çok terimli lojistik regresyon. Döndürür: tahmin fonksiyonu (sınıf indeksleri)."""
+    """gizli=() -> multinomial logistic regression. Returns: prediction function (class indices)."""
     torch.manual_seed(seed)
     katman, d = [], Xtr.shape[1]
     for h in gizli:
@@ -51,7 +51,7 @@ def sinir_agi(Xtr, ytr, n_sinif, gizli=(256, 128), epok=15, seed=0, lr=1e-3, bs=
 
 
 def en_yakin(Xtr, Xte, k=5, parca_te=4096, parca_tr=400_000):
-    """Her test satırı için en yakın k eğitim satırının (öklid uzaklığı, indeks). Tamamen GPU'da, parçalı."""
+    """For each test row, the k nearest training rows (Euclidean distance, index). Entirely on GPU, in chunks."""
     Tr = _tensor(Xtr)
     trn = (Tr * Tr).sum(1)
     D_all, I_all = [], []
@@ -71,7 +71,7 @@ def en_yakin(Xtr, Xte, k=5, parca_te=4096, parca_tr=400_000):
 
 
 def knn_tahmin(I, ytr, k):
-    """Çoğunluk oyu (eşitlikte en yakın komşu)."""
+    """Majority vote (nearest neighbor on ties)."""
     lab = ytr[I[:, :k]]
     if k == 1:
         return lab[:, 0]

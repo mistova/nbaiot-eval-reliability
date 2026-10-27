@@ -1,9 +1,9 @@
 #!/bin/bash
-# Faz 6 deneylerinin tamamını tek seferde başlatır. Her parça checkpoint'li; yeniden çalıştırılınca kaldığı yerden devam eder.
-#   E  : tek sınıflı otokodlayıcı (TensorFlow, GPU)           — kendi sürecinde
-#   C→G: Faysal tekrarı, ardından CIC-IoT2023 denetimi           — 4 çekirdek
-#   D  : protokoller, tohum başına bir süreç (42, 7, 123)       — süreç başına 4 çekirdek
-# A ve B daha önce tamamlandı (tablolar faz6_ciktilar/tables/ altında).
+# Starts all Faz 6 experiments at once. Every part has checkpoints; rerunning resumes where it left off.
+#   E  : one-class autoencoder (TensorFlow, GPU)              — in its own process
+#   C→G: Faysal replication, then CIC-IoT2023 audit              — 4 cores
+#   D  : protocols, one process per seed (42, 7, 123)           — 4 cores per process
+# A and B were completed earlier (tables are under faz6_ciktilar/tables/).
 cd "$(dirname "$0")"
 L=faz6_ciktilar/logs; mkdir -p "$L"
 echo "başladı: $(date)"

@@ -1,15 +1,15 @@
-"""Faz 7 P — Meidan ve ark. 2018 (N-BaIoT) özgün değerlendirme protokolünün yeniden üretimi (torch, GPU).
+"""Faz 7 P — Reproduction of the original evaluation protocol of Meidan et al. 2018 (N-BaIoT) (torch, GPU).
 
-Makaledeki protokol (Literatur Tarama/md/N-BaIoT...md):
-  - Her cihazın iyi huylu verisi kronolojik olarak üç eşit parçaya bölünür: DS_trn, DS_opt, DS_tst(iyi huylu).
-  - Otokodlayıcı 115-86-58-38-29-38-58-86-115 (girdinin %75, %50, %33, %25'i); DS_opt MSE'si düşmeyi bırakınca durur.
-  - tr* = ortalama(MSE_opt) + std(MSE_opt).
-  - ws* = DS_opt üzerinde kayan pencerede çoğunluk oyu %0 FPR veren en kısa pencere.
-  - Test: DS_tst iyi huylu + tüm saldırı dosyaları.
-Ekler: öznitelik seti (115 / zaman damgasız 110), ön işleme (z-skoru / işaretli log + z-skoru), 3 tohum;
-saldırı türü başına örnek ve pencere TPR'si; tekil içerik vektörleri üzerinde TPR; DS_tst iyi huylu satırlarının
-DS_trn'de içerik olarak bulunma oranı.
-Kullanım: python3 faz7_P_meidan.py
+Protocol in the paper (Literatur Tarama/md/N-BaIoT...md):
+  - Each device's benign data is split chronologically into three equal parts: DS_trn, DS_opt, DS_tst (benign).
+  - Autoencoder 115-86-58-38-29-38-58-86-115 (75%, 50%, 33%, 25% of the input); stops when DS_opt MSE stops decreasing.
+  - tr* = mean(MSE_opt) + std(MSE_opt).
+  - ws* = shortest window whose sliding majority vote gives 0% FPR on DS_opt.
+  - Test: DS_tst benign + all attack files.
+Additions: feature set (115 / 110 without timestamps), preprocessing (z-score / signed log + z-score), 3 seeds;
+per-attack-type samples and window TPR; TPR on unique content vectors; share of DS_tst benign rows whose
+content is found in DS_trn.
+Usage: python3 faz7_P_meidan.py
 """
 import time
 
@@ -64,7 +64,7 @@ def egit(Ztr, Zopt, seed, lr=1e-3, bs=256, max_epok=100, sabir=5):
 
 
 def pencere_karar(anomali, ws):
-    """Uzunluğu ws olan her kayan pencerede çoğunluk anomali mi (pencere sayısı = n - ws + 1)."""
+    """Whether the majority is anomalous in every sliding window of length ws (number of windows = n - ws + 1)."""
     if len(anomali) < ws:
         return np.array([anomali.mean() > 0.5])
     c = np.concatenate([[0], np.cumsum(anomali)])

@@ -1,5 +1,5 @@
-"""Faz 8 analizi: profil tablosu, tek sayı (GS), tehlike / kalan risk / giderilebilirlik ve geçerlilik sınaması.
-Girdi: faz8_ciktilar/tables/faz8_<veri>.csv  ·  Çıktı: faz8_ciktilar/FAZ8_OZET.md ve tables/faz8_profil.csv"""
+"""Faz 8 analysis: profile table, single number (GS), hazard / residual risk / remediability, and validity test.
+Input: faz8_ciktilar/tables/faz8_<veri>.csv  ·  Output: faz8_ciktilar/FAZ8_OZET.md and tables/faz8_profil.csv"""
 import glob
 import os
 import sys
@@ -12,11 +12,11 @@ from scipy.stats import kendalltau, spearmanr
 
 OUT = os.path.expanduser("~/work/IoT_Botnet/faz8_ciktilar")
 TAB = f"{OUT}/tables"
-# temiz referansın hangi öznitelik setinden alınacağı (N-BaIoT: zaman damgası sütunları çıkarılmış set)
+# which feature set the clean reference is taken from (N-BaIoT: the set with timestamp columns removed)
 REF_KAYNAK = {"nbaiot": "nbaiot_temiz"}
 GRUP = {"nbaiot": "sorunlu", "nbaiot_temiz": "sorunlu", "iot23": "sorunlu", "botiot": "sorunlu", "cicids2017": "sorunlu",
         "cic2023": "kısmen", "kitsune": "kısmen", "medbiot": "temiz aday", "cicids2017_engelen": "temiz aday"}
-MIN_TEST = 200          # bundan az test satırı kalan noktalar geçerlilik analizine girmez
+MIN_TEST = 200          # points with fewer test rows than this are excluded from the validity analysis
 
 parca = []
 
@@ -34,7 +34,7 @@ kis = D[D.kayit == "kisayol"].set_index("veri")
 B = D[D.protokol.notna()].copy()
 B["n_te_eff"] = B.n_te_filtre.fillna(B.n_te_ornek) * (1 - B.gorulmemis_sinif_payi.fillna(0))
 
-# protokol başına profil (varlık katları ortalanır)
+# per-protocol profile (entity folds are averaged)
 prof = B.groupby(["veri", "protokol"]).agg(
     tau0=("tau0", "mean"), tau_e=("tau_0.01", "mean"), tau_e_001=("tau_0.001", "mean"), tau_e_01=("tau_0.1", "mean"),
     F1=("F1", "mean"), F1_std_tohum=("F1_std", "mean"), F1_kat_std=("F1", "std"), NN1_F1=("NN1_F1", "mean"),
@@ -46,7 +46,7 @@ prof["sigma_k"] = prof.veri.map(kis.HDF_max_F1) / prof.F1
 prof["nu"] = prof.NN1_F1 / prof.F1
 prof["grup"] = prof.veri.map(GRUP)
 
-# temiz referans ve şişme
+# clean reference and inflation (sisme)
 ref = {}
 for v in prof.veri.unique():
     kaynak = REF_KAYNAK.get(v, v)
@@ -64,7 +64,7 @@ bas("Profil — veri seti × protokol (ε = 0,01)", prof.set_index(["veri", "pro
     3, "P0 rastgele · P1 tekrar grubu ayrık · P2 varlık dışarıda · P3 P2 + yakın ikiz filtresi · P4 P0 + yakın ikiz filtresi. "
        "GS = κ·(1−τε). σk = tek öznitelik F1 / model F1. ν = 1-NN F1 / model F1 (tanı).")
 
-# tehlike / kalan risk / giderilebilirlik
+# hazard / residual risk / remediability
 rows = []
 for v, g in prof.groupby("veri"):
     h = g[g.protokol == "P0"]
@@ -82,7 +82,7 @@ bas("Tehlike (P0) — kalan risk (farkında protokol) — giderilebilirlik", pd.
     "Farkında protokol: varlık varsa P2 (varlık dışarıda), yoksa P1 (tekrar grubu ayrık). "
     "P3/P4 yakın ikizleri tanım gereği sıfırlar; kalan risk orada yalnızca κ ve kısayoldur.")
 
-# geçerlilik: metrik şişmeyi öngörüyor mu
+# validity: does the metric predict inflation
 G = prof[(prof.n_te_eff >= MIN_TEST) & prof.sisme.notna() & ~prof.protokol.isin(["P3"])].copy()
 sat = []
 for ad, x in (("tau_e", G.tau_e), ("tau0", G.tau0), ("1-GS", 1 - G.GS), ("nu", G.nu), ("sigma_k", G.sigma_k)):
@@ -94,7 +94,7 @@ bas("Geçerlilik — göstergelerin şişmeyle sıra korelasyonu (veri seti × p
     pd.DataFrame(sat).set_index("gosterge"), 3,
     f"Şişme = F1(nokta) − F1(temiz referans). Referans noktası (P3) analiz dışı; test satırı < {MIN_TEST} olan noktalar dışarıda.")
 
-# veri setinden bağımsızlık: her veri seti dışarıda bırakılınca korelasyon
+# independence from the dataset: correlation when each dataset is left out
 lodo = []
 for v in G.veri.unique():
     g = G[G.veri != v]
@@ -103,14 +103,14 @@ for v in G.veri.unique():
                      "spearman_1-GS": spearmanr(1 - g.GS, g.sisme)[0]})
 bas("Geçerlilik sağlamlığı — bir veri seti dışarıda bırakılınca", pd.DataFrame(lodo).set_index("disarida"), 3)
 
-# ε duyarlılığı
+# ε sensitivity
 eps = []
 for col, e in (("tau_e_001", 0.001), ("tau_e", 0.01), ("tau_e_01", 0.1)):
     ok = G[col].notna()
     eps.append({"epsilon": e, "spearman": spearmanr(G[col][ok], G.sisme[ok])[0]})
 bas("ε duyarlılığı", pd.DataFrame(eps).set_index("epsilon"), 3)
 
-# veri seti içi (protokol karşılaştırması): veri ortalaması çıkarılınca; ayrıca P4'süz (filtrelenmiş küçük test bileşimi)
+# within dataset (protocol comparison): after subtracting the dataset mean; also without P4 (composition of the small filtered test)
 ic = []
 for col in ("tau_e_001", "tau_e", "tau_e_01", "tau0"):
     x = G[col] - G.groupby("veri")[col].transform("mean")
@@ -124,4 +124,4 @@ bas("Veri seti içi ve P4'süz korelasyon", pd.DataFrame(ic).set_index("gosterge
 bas("Grup ortalamaları (P0, tehlike)", prof[prof.protokol == "P0"].groupby("grup")[["tekrar_payi", "kappa", "tau0", "tau_e", "GS", "sisme"]].mean(), 3)
 
 open(f"{OUT}/FAZ8_OZET.md", "w", encoding="utf-8").write("# Faz 8 — değerlendirme güvenilirliği metriği (otomatik özet)\n" + "".join(parca))
-print("yazıldı:", f"{OUT}/FAZ8_OZET.md")
+print("written:", f"{OUT}/FAZ8_OZET.md")

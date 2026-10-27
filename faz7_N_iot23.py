@@ -1,12 +1,12 @@
-"""Faz 7 N — IoT-23 (23 senaryo, conn.log.labeled) tekrar / çelişki / sızıntı denetimi (eğitim yok).
+"""Faz 7 N — IoT-23 (23 scenarios, conn.log.labeled) duplicate / conflict / leakage audit (no training).
 
-Öznitelik vektörü, IoT-23 çalışmalarında tipik kullanılan akış alanlarıdır (zaman, uid, IP'ler hariç):
+The feature vector is the flow fields typically used in IoT-23 studies (excluding time, uid, IPs):
   akis      : proto service duration orig_bytes resp_bytes conn_state missed_bytes history orig_pkts orig_ip_bytes resp_pkts resp_ip_bytes
-  akis_port : akis + id.resp_p (hedef port; D'hooge 2022'nin üstveri uyarısı)
-Ölçüler: etiket ve ayrıntılı etiket başına tekillik; aynı vektörün iyi ve kötü huylu etiket taşıması;
-rastgele %70/30 bölmede test-eğitim ikiz payı; bir-senaryo-dışarıda: senaryo satırlarının diğer senaryolarda
-bulunma payı; Li 2026 doğruluk tavanı.
-Kullanım: python3 faz7_N_iot23.py   (senaryolar 4 süreçte paralel okunur)
+  akis_port : akis + id.resp_p (destination port; D'hooge 2022's metadata warning)
+Measures: uniqueness per label and per detailed label; the same vector carrying both benign and malicious labels;
+test-train twin share under a random 70/30 split; leave-one-scenario-out: share of a scenario's rows found in
+other scenarios; Li 2026 accuracy ceiling.
+Usage: python3 faz7_N_iot23.py   (scenarios are read in parallel in 4 processes)
 """
 import glob
 import multiprocessing as mp
@@ -22,7 +22,7 @@ PARCA = 2_000_000
 
 def oku(yol):
     alanlar, n = None, 0
-    LKOD, DKOD = {}, {}   # etiket → küçük tamsayı (süreçler arası taşınan veri küçük kalsın)
+    LKOD, DKOD = {}, {}   # label → small integer (keeps the data passed between processes small)
     hA, hP, lab, det = [], [], [], []
     bufA, bufP, bufL, bufD = [], [], [], []
 
@@ -65,7 +65,7 @@ def oku(yol):
 
 def main():
     dosyalar = sorted(glob.glob(os.path.expanduser("~/work/IoT_Botnet/veri/iot23/opt/**/conn.log.labeled"), recursive=True))
-    # büyük dosyalar önce
+    # largest files first
     dosyalar.sort(key=os.path.getsize, reverse=True)
     S, HA, HP, L, D = [], [], [], [], []
     with mp.Pool(4) as pool:
@@ -76,7 +76,7 @@ def main():
     from pandas.api.types import union_categoricals
     sen, lab, det = union_categoricals(S), union_categoricals(L), union_categoricals(D)
     del S, L, D
-    labarr = np.asarray(lab.astype(str))   # yalnızca 'benign' / 'malicious' (ve küçük varyantlar)
+    labarr = np.asarray(lab.astype(str))   # only 'benign' / 'malicious' (and minor variants)
     ozet, satirlar = {}, []
     for vad, H in (("akis", np.concatenate(HA)), ("akis_port", np.concatenate(HP))):
         n = len(H)
@@ -101,7 +101,7 @@ def main():
             yt = labarr[p[k:]]
             for e in ("benign", "malicious"):
                 ozet[f"{vad}_rastgele_sizinti_{e}_%_s{seed}"] = 100 * ici[yt == e].mean()
-        # bir-senaryo-dışarıda: senaryonun satırlarının ne kadarı başka senaryoda da var
+        # leave-one-scenario-out: share of the scenario's rows that also occur in another scenario
         sk = sen.codes
         for si, s in enumerate(sen.categories):
             m = sk == si
@@ -113,7 +113,7 @@ def main():
                 r[f"{e}_satir"] = int((yt == e).sum())
                 r[f"{e}_diger_senaryoda_%"] = 100 * ici[yt == e].mean() if (yt == e).any() else np.nan
             satirlar.append(r)
-        log(vad, "tamam")
+        log(vad, "done")
     pd.Series(ozet).to_csv(f"{TAB}/N_iot23_ozet.csv")
     pd.DataFrame(satirlar).to_csv(f"{TAB}/N_iot23_ayrinti.csv", index=False)
     print(pd.Series(ozet).round(3).to_string())

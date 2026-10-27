@@ -1,6 +1,6 @@
-"""Makale şekilleri (J Comput Virol Hack Tech, Springer). Girdi: faz çıktı tabloları. Çıktı: makale/figures/Fig*.pdf
-Sütun genişliği 84 mm, tam genişlik 174 mm; yazı Nimbus Sans (Helvetica eşdeğeri); renk: dataviz referans paleti
-ilk üç yuva (tüm çiftlerde CVD doğrulamalı), her seride ayrıca işaretçi/yazı ile ikincil kodlama."""
+"""Paper figures (J Comput Virol Hack Tech, Springer). Input: phase output tables. Output: makale/figures/Fig*.pdf
+Column width 84 mm, full width 174 mm; font Nimbus Sans (Helvetica equivalent); color: first three slots of the
+dataviz reference palette (CVD-verified for all pairs), with secondary coding by marker/text in every series."""
 import os
 
 import matplotlib
@@ -13,7 +13,7 @@ import pandas as pd
 K = os.path.expanduser("~/work/IoT_Botnet")
 OUT = f"{K}/makale/figures"
 MM = 1 / 25.4
-S1, S2, S3 = "#2a78d6", "#eb6834", "#1baf7a"      # kategorik yuvalar 1–3
+S1, S2, S3 = "#2a78d6", "#eb6834", "#1baf7a"      # categorical slots 1–3
 INK, INK2, GRID = "#0b0b0b", "#52514e", "#d9d8d4"
 plt.rcParams.update({
     "font.family": "Nimbus Sans", "font.size": 7.5, "axes.titlesize": 8, "axes.labelsize": 7.5,
@@ -41,7 +41,7 @@ def kaydet(fig, ad):
     plt.close(fig)
 
 
-# ---------------------------------------------------------------- Fig. 1: kayıt oturumları (zaman damgasından)
+# ---------------------------------------------------------------- Fig. 1: capture sessions (from timestamps)
 def fig1():
     b = pd.read_csv(f"{K}/faz6_ciktilar/tables/B3_zd_tarihleri.csv", parse_dates=["ilk", "son"])
     b["cihaz"] = b.cihaz.map(KISA)
@@ -57,7 +57,7 @@ def fig1():
                     continue
                 ax.barh(i, (r.son - r.ilk) / pd.Timedelta(days=1), left=mdates.date2num(r.ilk), height=0.62,
                         color=renk_f(d), edgecolor="white", linewidth=0.5)
-        # tür adları: ilk cihazın aralığının üstünde
+        # type names: above the first device's interval
         ilk = g[g.cihaz == cihazlar[0]]
         for _, r in ilk.iterrows():
             ax.text(mdates.date2num(r.ilk + (r.son - r.ilk) / 2), -0.75, r.sinif.split(":")[1],
@@ -75,7 +75,7 @@ def fig1():
     kaydet(fig, "Fig1")
 
 
-# ---------------------------------------------------------------- Fig. 2: protokol sızıntısı ve arındırma etkisi
+# ---------------------------------------------------------------- Fig. 2: protocol leakage and the effect of filtering
 def fig2():
     q = pd.read_csv(f"{K}/faz7_ciktilar/tables/QJ_protokoller.csv")
     siz = q.groupby("bolme").test_sizinti.mean()
@@ -105,7 +105,7 @@ def fig2():
     kaydet(fig, "Fig2")
 
 
-# ---------------------------------------------------------------- Fig. 3: tehlike → kalan risk
+# ---------------------------------------------------------------- Fig. 3: hazard → residual risk
 def fig3():
     p = pd.read_csv(f"{K}/faz8_ciktilar/tables/faz8_profil.csv")
     rows = []
@@ -127,7 +127,7 @@ def fig3():
     kaydet(fig, "Fig3")
 
 
-# ---------------------------------------------------------------- Fig. 4: ε seçimi
+# ---------------------------------------------------------------- Fig. 4: choice of ε
 def fig4():
     a = pd.read_csv(f"{K}/faz8_ciktilar/tables/faz8_eps_adaylar.csv")
     s = a[a.aile == "sabit"].copy()
@@ -147,7 +147,7 @@ def fig4():
     kaydet(fig, "Fig4")
 
 
-# ---------------------------------------------------------------- Fig. 5: gürültü → ε*
+# ---------------------------------------------------------------- Fig. 5: noise → ε*
 def fig5():
     d = pd.read_csv(f"{K}/faz8_ciktilar/tables/faz8c_bozma.csv")
     fig, ax = plt.subplots(figsize=(84 * MM, 55 * MM))
@@ -167,4 +167,4 @@ def fig5():
 
 if __name__ == "__main__":
     for f in (fig1, fig2, fig3, fig4, fig5):
-        f(); print(f.__name__, "tamam")
+        f(); print(f.__name__, "done")

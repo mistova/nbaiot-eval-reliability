@@ -1,13 +1,13 @@
-"""Faz 6 — iddia ve hipotezlerin doğrulanması (TensorFlow yok).
+"""Faz 6 — verification of claims and hypotheses (no TensorFlow).
 
-Kullanım:  python3 faz6_dogrulama.py A|B|C|G   ·   python3 faz6_dogrulama.py D <tohum>|ozet
-  A  hash denetimi float64 ile tekrar (tekillik, türler/cihazlar arası ortaklık, S1-S5 sızıntısı)
-  B  zaman damgası artefaktı (hangi öznitelikler, tek başına ne ayırıyor)
-  C  Faysal 2022 tekrarı: Ecobee, rastgele 75/25, RF ve XGB, HH_jit var/yok, RF ile 40 öznitelik seçimi, 5 tohum
-  D  Faz 5 protokolleri (S1-S5) + sızıntı arındırılmış S1f/S3f/S4f; öznitelik seti 115 / HH_jit'siz / yalnız HH_jit
-  G  CIC-IoT2023 tekrar ve etiket çelişkisi denetimi (bulgunun N-BaIoT'ye özgü olup olmadığı)
+Usage:  python3 faz6_dogrulama.py A|B|C|G   ·   python3 faz6_dogrulama.py D <seed>|ozet
+  A  hash audit repeated with float64 (uniqueness, overlap across types/devices, S1-S5 leakage)
+  B  timestamp artifact (which features, what each separates on its own)
+  C  Faysal 2022 replication: Ecobee, random 75/25, RF and XGB, with/without HH_jit, 40-feature selection with RF, 5 seeds
+  D  Faz 5 protocols (S1-S5) + leak-filtered S1f/S3f/S4f; feature set 115 / without HH_jit / HH_jit only
+  G  CIC-IoT2023 replication and label-conflict audit (whether the finding is specific to N-BaIoT)
 
-Çıktı: faz6_ciktilar/tables/  ·  checkpoint: faz6_ciktilar/faz6_<parça>_checkpoint.pkl
+Output: faz6_ciktilar/tables/  ·  checkpoint: faz6_ciktilar/faz6_<part>_checkpoint.pkl
 """
 import datetime as dt
 import glob
@@ -51,12 +51,12 @@ def log(*a):
     print(time.strftime("%H:%M:%S"), *a, flush=True)
 
 
-# ------------------------------------------------------------------ veri
+# ------------------------------------------------------------------ data
 def yukle():
-    """X (float64, mmap) ve meta tablosu. İlk çağrıda CSV'lerden önbellek kurar."""
+    """X (float64, mmap) and the meta table. On the first call it builds a cache from the CSVs."""
     xp, mp = f"{CACHE}/X64.npy", f"{CACHE}/meta.pkl"
     if not os.path.exists(xp):
-        log("CSV'ler okunuyor (float64)...")
+        log("reading CSVs (float64)...")
         X, meta = [], []
         for f in sorted(glob.glob(f"{KOK}/**/*.csv", recursive=True)):
             if "demonstrate" in f:
@@ -81,8 +81,8 @@ def yukle():
 
 
 def satir_hash(X, hassasiyet, haric=(), ad=None):
-    """Satır başına 64 bit özet; sütun özetleri pandas hash_array ile birleştirilir.
-    haric: özete katılmayacak sütun indeksleri (ör. zaman damgası sütunları)."""
+    """64-bit digest per row; column digests are combined with pandas hash_array.
+    haric: indices of columns excluded from the digest (e.g. timestamp columns)."""
     yol = f"{CACHE}/hash_{ad or hassasiyet}.npy"
     if os.path.exists(yol):
         return np.load(yol)
@@ -102,7 +102,7 @@ def utc(x):
     return dt.datetime.fromtimestamp(float(x), dt.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 
 
-# ------------------------------------------------------------------ bölmeler (Faz 5 ile aynı tanım)
+# ------------------------------------------------------------------ splits (same definition as Faz 5)
 def bolmeler(M, H, seed):
     rs = np.random.RandomState(seed)
     n = len(M)
@@ -127,7 +127,7 @@ def bolmeler(M, H, seed):
 
 
 def arindir(bl, H):
-    """Test kümesinden, içerik hash'i eğitimde bulunan satırları çıkarır (S1→S1f, S3→S3f, S4→S4f)."""
+    """Removes from the test set the rows whose content hash is present in training (S1→S1f, S3→S3f, S4→S4f)."""
     out = []
     for b, k, tr, te in bl:
         if b in ("S1", "S3", "S4"):
@@ -153,7 +153,7 @@ def parca_A():
     X, M, ozn = yukle()
     H = {p: satir_hash(X, p) for p in ("float64", "float32")}
     H["float64_zdsiz"] = satir_hash(X, "float64", haric=set(zd_ozn(ozn)), ad="float64_zdsiz")
-    log("hash hazır")
+    log("hash ready")
     anahtar = list(M.groupby(["cihaz", "aile", "tur"]).indices.items())
 
     t1 = []
@@ -173,7 +173,7 @@ def parca_A():
     for p in H: oz[f"tekillik_{p}_%"] = 100 * oz[f"tekil_{p}"] / oz.satir
     print(oz.round(3).to_string())
 
-    # tcp/udp ve iyi huylu-saldırı ortaklığı
+    # tcp/udp and benign-attack overlap
     t2, t4 = [], []
     for c in sorted(M.cihaz.unique()):
         for p in H:
@@ -188,7 +188,7 @@ def parca_A():
     print(pd.DataFrame(t2).pivot(index="cihaz", columns="hassasiyet", values="ortak_tekil").to_string())
     print(pd.DataFrame(t4).groupby("hassasiyet").iyi_saldiri_ortak_tekil.sum().to_string())
 
-    # cihazlar arası ortaklık
+    # cross-device overlap
     t3 = []
     for a, t in sorted({(a, t) for (_, a, t) in kume["float64"] if a != "benign"}):
         cs = sorted(c for (c, aa, tt) in kume["float64"] if (aa, tt) == (a, t))
@@ -203,7 +203,7 @@ def parca_A():
     t3.to_csv(f"{TAB}/A3_cihazlar_arasi.csv", index=False)
     print(t3.groupby("sinif")[[f"pay_{p}_%" for p in H]].agg(["min", "mean"]).round(1).to_string())
 
-    # sızıntı
+    # leakage
     rows = []
     for p, h in H.items():
         s = sizinti(M, h, bolmeler(M, h, 42)); s.insert(0, "hassasiyet", p); rows.append(s)
@@ -217,7 +217,7 @@ def parca_B():
     X, M, ozn = yukle()
     aile, sinif = M.aile.to_numpy(), M.sinif.to_numpy()
 
-    # B1: hangi sütunlar zaman damgası değeri taşıyor
+    # B1: which columns carry timestamp values
     rows = []
     for j, c in enumerate(ozn):
         buyuk = np.asarray(X[:, j]) > 1e9
@@ -230,16 +230,16 @@ def parca_B():
     b1.to_csv(f"{TAB}/B1_zd_sutunlar.csv", index=False)
     print(b1.set_index("oznitelik").round(1).T.to_string())
 
-    # B2: "HH_jit_*_mean > 1e9" kuralı tek başına saldırı dedektörü olarak
+    # B2: the "HH_jit_*_mean > 1e9" rule as an attack detector on its own
     zi = zd_ozn(ozn)
     kural = (np.asarray(X[:, zi]) > 1e9).any(axis=1)
     b2 = pd.DataFrame({"sinif": sinif, "isaret": kural}).groupby("sinif").isaret.mean().mul(100)
     b2.to_csv(f"{TAB}/B2_kural_dedektor.csv")
     print(b2.round(2).to_string())
     y = M.kotu.to_numpy()
-    print(f"kural: TPR={kural[y == 1].mean():.4f}  FPR={kural[y == 0].mean():.5f}  MCC={matthews_corrcoef(y, kural):.4f}")
+    print(f"rule: TPR={kural[y == 1].mean():.4f}  FPR={kural[y == 0].mean():.5f}  MCC={matthews_corrcoef(y, kural):.4f}")
 
-    # B3: zaman damgalarının tarih aralığı
+    # B3: date range of the timestamps
     ts = np.asarray(X[:, zi[0]])
     rows = []
     for (c, s), idx in M.groupby(["cihaz", "sinif"]).indices.items():
@@ -252,7 +252,7 @@ def parca_B():
     print(b3[b3.sinif == "benign"].to_string(index=False))
     print(b3.groupby("sinif")[["ilk", "son"]].agg({"ilk": "min", "son": "max"}).to_string())
 
-    # B4: yalnızca 5 HH_jit_*_mean özniteliğiyle ne öğrenilebilir (S1 rastgele, 3 tohum)
+    # B4: what can be learned with only the 5 HH_jit_*_mean features (S1 random, 3 seeds)
     rows = []
     for seed in (42, 7, 123):
         rs = np.random.RandomState(seed)
@@ -298,7 +298,7 @@ def parca_C():
     setler = {"hepsi_115": list(range(len(ozn))),
               "HHjit_mean_yok_110": [i for i in range(len(ozn)) if i not in zi],
               "HHjit_hepsi_yok_100": [i for i in range(len(ozn)) if i not in jit_hepsi]}
-    # Faysal'ın sınıf sayılarına göre alt örneklem (Kaggle kopyası) ve tam Ecobee
+    # Subsample matching Faysal's class counts (Kaggle copy) and the full Ecobee
     faysal = {"benign": 13113, "mirai:ack": 27188, "mirai:scan": 9502, "mirai:syn": 23361,
               "mirai:udp": 15148, "mirai:udpplain": 26210, "gafgyt:combo": 21205,
               "gafgyt:junk": 24250, "gafgyt:scan": 21995, "gafgyt:tcp": 23755, "gafgyt:udp": 24102}
@@ -323,7 +323,7 @@ def parca_C():
                         continue
                     t0 = time.time()
                     if mad.endswith("sec40"):
-                        # Faysal: RF öznitelik önemine göre ilk 40 öznitelik, sonra sınıflandırıcı
+                        # Faysal: top 40 features by RF feature importance, then the classifier
                         if sec40 is None:
                             imp = RandomForestClassifier(n_estimators=100, n_jobs=N_JOBS, random_state=seed)
                             imp.fit(Xe[tr], y_all[tr])
@@ -361,7 +361,7 @@ def parca_D(arg):
         return
     seed = int(arg)
     X, M, ozn = yukle()
-    # S2 tekilleştirmesi içerik hash'iyle (zaman damgası sütunları hariç; Faz 5'in float32 hash'iyle eşdeğer)
+    # S2 deduplication by content hash (excluding timestamp columns; equivalent to Faz 5's float32 hash)
     H = satir_hash(X, "float64", haric=set(zd_ozn(ozn)), ad="float64_zdsiz")
     jit = [i for i, c in enumerate(ozn) if c.startswith("HH_jit_")]
     setler = {"hepsi_115": np.arange(len(ozn)),
@@ -370,7 +370,7 @@ def parca_D(arg):
     y_bin, y_cok, aile = M.kotu.to_numpy(), M.sinif.to_numpy(), M.aile.to_numpy()
     ZOR = ("gafgyt:tcp", "gafgyt:udp", "gafgyt:junk")
     ck = f"{OUT}/faz6_D_{seed}_checkpoint.pkl"
-    eski = f"{OUT}/faz6_D_checkpoint.pkl"   # tek dosyalı ilk sürümden devralma
+    eski = f"{OUT}/faz6_D_checkpoint.pkl"   # carry-over from the single-file first version
     SON = pickle.load(open(ck, "rb")) if os.path.exists(ck) else \
         [r for r in (pickle.load(open(eski, "rb")) if os.path.exists(eski) else []) if r["seed"] == seed]
     tamam = {(r["bolme"], r["kat"], r["model"], r["oznitelik"], r["seed"]) for r in SON}
@@ -409,15 +409,15 @@ def parca_D(arg):
                     r["sure_s"] = round(time.time() - t0, 1)
                     SON.append(r); log(b, k, mad, oad, seed, f"MCC={r['MCC_ikili']:.4f} F1={r['F1_makro_cok']:.4f} ({r['sure_s']}s)")
                     pickle.dump(SON, open(ck, "wb"))
-    log(f"D tohum {seed} bitti: {len(SON)} satır")
+    log(f"D seed {seed} bitti: {len(SON)} rows")
 
 
 # ------------------------------------------------------------------ G
-GBOZUK = set()   # gerekirse python motoruyla okunacak dosyalar
+GBOZUK = set()   # files to read with the python engine if needed
 
 
 def parca_G():
-    """CIC-IoT2023: etiket içi tekrar, etiketler arası çelişki (aynı vektör farklı etiket), rastgele bölme sızıntısı."""
+    """CIC-IoT2023: repetition within a label, conflict across labels (same vector, different label), random-split leakage."""
     kok = os.path.expanduser("~/work/IoT_Botnet/veri/cic2023/merged/MERGED_CSV")
     hs, ls, bozuk = [], [], {}
     for f in sorted(glob.glob(f"{kok}/*.csv")):
@@ -435,7 +435,7 @@ def parca_G():
         hs.append(h); ls.append(y)
         log(os.path.basename(f), len(df))
     H, Y = np.concatenate(hs), np.concatenate(ls)
-    log("bozuk/atlanan satır:", bozuk or "yok")
+    log("corrupt/skipped rows:", bozuk or "none")
     pd.Series(bozuk, dtype=int).to_csv(f"{TAB}/G0_cic2023_bozuk_satir.csv")
     n = len(H)
     rows = []
@@ -447,13 +447,13 @@ def parca_G():
     g1 = pd.DataFrame(rows).sort_values("tekillik_%")
     g1.to_csv(f"{TAB}/G1_cic2023_etiket_tekillik.csv", index=False)
     print(g1.to_string(index=False))
-    # aynı vektör birden fazla etikette
+    # same vector under more than one label
     d = pd.DataFrame({"h": H, "y": Y}).drop_duplicates()
     cok = d.groupby("h").y.nunique()
     celiski = cok[cok > 1].index
-    print(f"tekil vektör: {len(cok):,}  birden fazla etikette görünen: {len(celiski):,}  "
-          f"bu vektörleri taşıyan satır payı: %{100 * np.isin(H, celiski.to_numpy()).mean():.3f}")
-    # rastgele %70/30 bölme sızıntısı (3 tohum)
+    print(f"unique vectors: {len(cok):,}  appearing under more than one label: {len(celiski):,}  "
+          f"share of rows carrying these vectors: %{100 * np.isin(H, celiski.to_numpy()).mean():.3f}")
+    # random 70/30 split leakage (3 seeds)
     s = []
     for seed in (42, 7, 123):
         p = np.random.RandomState(seed).permutation(n); k = int(0.7 * n)

@@ -1,7 +1,7 @@
-"""Faz 7 J — Q ile aynı bölmeler ve öznitelik setleri, GPU model aileleri: XGB (cuda), MLP, LR (softmax), kNN-1, kNN-5.
-Amaç: bulguların model ailesinden bağımsız olduğunu göstermek; kNN-1 ayrıca 'ezber taban çizgisi'.
-İkili tahmin çok sınıflı tahminden türetilir (benign dışı → saldırı).
-Kullanım: python3 faz7_J_gpu_protokoller.py <tohum> [<tohum> ...]
+"""Phase 7 J - same splits and feature sets as Q, GPU model families: XGB (cuda), MLP, LR (softmax), kNN-1, kNN-5.
+Goal: show that the findings are independent of the model family; kNN-1 also serves as the 'memorization baseline'.
+Binary prediction is derived from the multiclass prediction (non-benign -> attack).
+Usage: python3 faz7_J_gpu_protokoller.py <tohum> [<tohum> ...]
 """
 import sys
 import time
@@ -39,7 +39,7 @@ def main(seed):
             on = Onisleme().fit(Xtr)
             Ztr, Zte = on(Xtr), on(Xte)
             ytr = yk[tr_s]
-            # eğitimde bulunmayan sınıflar (S4/S5) için yeniden numaralandırma
+            # renumbering for classes absent from training (S4/S5)
             var = np.unique(ytr); harita = np.full(len(siniflar), -1); harita[var] = np.arange(len(var))
             ytr2 = harita[ytr]
             komsu = None
@@ -82,7 +82,7 @@ def main(seed):
                 r["sure_s"] = round(time.time() - t0, 1)
                 SON.append(r); ck_yaz(ad, SON); tamam.add((b, k, mad, oad))
                 log(b, k, mad, oad, seed, f"MCC={r['MCC_ikili']:.4f} F1={r['F1_makro_cok']:.4f} ({r['sure_s']}s)")
-    log(f"J tohum {seed} bitti: {len(SON)} satır")
+    log(f"J seed {seed} done: {len(SON)} rows")
 
 
 if __name__ == "__main__":

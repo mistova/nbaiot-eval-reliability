@@ -1,6 +1,6 @@
 #!/bin/bash
-# Faz 7 iş kuyruğu: ilk dalga (elle başlatılan süreçler) bittikçe kalan tohumları başlatır.
-# Her iş checkpoint'li; sonda tüm işler bir kez daha çağrılır (bekçinin durdurduğu iş varsa kaldığı yerden sürer).
+# Phase 7 job queue: starts the remaining seeds as the first wave (manually started processes) finishes.
+# Every job is checkpointed; at the end all jobs are called once more (a job stopped by the watchdog resumes where it left off).
 cd "$(dirname "$0")"
 L=faz7_ciktilar/logs
 bekle() { while kill -0 "$1" 2>/dev/null; do sleep 30; done; }
@@ -15,7 +15,7 @@ GPU="OMP_NUM_THREADS=2"
 ( bekle 2187269; env $GPU python3 faz7_J_gpu_protokoller.py 13 >> $L/J_c.log 2>&1 ) &
 wait
 
-# ikinci tur: yarıda kalan her şeyi tamamla
+# second pass: finish everything left incomplete
 for s in 42 7 123 2024 13; do env $CPU python3 faz7_Q_protokoller.py $s >> $L/Q_tur2.log 2>&1; done &
 env $CPU python3 faz7_H_arumugam.py 42 0 1 2 3 4 5 6 7 8 9 >> $L/H_tur2.log 2>&1 &
 ( env $GPU python3 faz7_J_gpu_protokoller.py 42 7 123 2024 13 >> $L/J_tur2.log 2>&1

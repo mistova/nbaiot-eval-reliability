@@ -1,4 +1,4 @@
-"""Faz 7 ortak yardımcıları. Faz 6'nın veri önbelleğini (X64.npy, meta.pkl, hash'ler) ve bölme tanımlarını kullanır."""
+"""Phase 7 shared helpers. Uses the Phase 6 data cache (X64.npy, meta.pkl, hashes) and split definitions."""
 import os
 import pickle
 import sys
@@ -38,18 +38,18 @@ def ck_yaz(ad, son):
 
 
 def icerik_hash(X, ozn):
-    """Zaman damgası taşıyan 5 HH_jit_*_mean sütunu hariç float64 içerik özeti (Faz 6 ile aynı dosya)."""
+    """float64 content hash excluding the 5 HH_jit_*_mean columns that carry timestamps (same file as in Phase 6)."""
     return satir_hash(X, "float64", haric=set(zd_ozn(ozn)), ad="float64_zdsiz")
 
 
 def blok_id(M, b=BLOK):
-    """Her (cihaz, aile, tür) dosyası içinde ardışık b satırlık bloklar (Arumugam 2026'daki birim)."""
+    """Consecutive blocks of b rows within each (cihaz, aile, tur) file (the unit used in Arumugam 2026)."""
     dosya = M.groupby(["cihaz", "aile", "tur"], sort=False).ngroup().to_numpy().astype(np.int64)
     return dosya * 100_000 + (M.satir_no.to_numpy() // b)
 
 
 def bolmeler7(M, H, seed):
-    """Faz 6 bölmeleri (S1–S5) + S6: tüm veride 500 satırlık blok ayrık rastgele %80/20 bölme."""
+    """Phase 6 splits (S1-S5) + S6: random 80/20 split over the whole data, disjoint by 500-row blocks."""
     out = bolmeler(M, H, seed)
     g = blok_id(M)
     ug = np.unique(g)
@@ -60,7 +60,7 @@ def bolmeler7(M, H, seed):
 
 
 def arindir7(bl, H):
-    """Test kümesinden içerik hash'i eğitimde bulunan satırları çıkarır (S1f, S3f, S4f, S6f)."""
+    """Removes test rows whose content hash occurs in training (S1f, S3f, S4f, S6f)."""
     out = arindir(bl, H)
     for b, k, tr, te in bl:
         if b == "S6":
@@ -78,5 +78,5 @@ def oznitelik_setleri(ozn):
 
 
 def isaretli_log(X):
-    """İşaretli log1p: zaman damgası (~1,5e9) ve 1e21'e varan büyüklükleri sıkıştırır."""
+    """Signed log1p: compresses timestamps (~1.5e9) and magnitudes up to 1e21."""
     return np.sign(X) * np.log1p(np.abs(X))

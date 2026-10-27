@@ -1,10 +1,10 @@
-"""Faz 8c: ε uyarlama rehberi — denetimli bozma deneyi (kullanıcı onayı 2026-10-23).
-Her (veri, bozma, düzey) koşulunda satır düzeyinde en iyi ε (ε*):
-  şişmiş satır = P0 (rastgele 70/30) modeli doğru, satırın varlığı eğitimden tümüyle çıkarılmış model (P2) yanlış
-  d            = test satırının P0 eğitimindeki en yakın komşu mesafesi / √boyut (işaretli log + z-skoru)
-  ε*           = şişmiş satırları "d ≤ ε" ile en iyi ayıran eşik (Youden J); 200 bootstrap ile %95 aralık
-Bozmalar: göreli gürültü, anlamlı basamağa nicemleme, satır seyreltme (kayan pencere sıklığı), öznitelik alt kümesi.
-Çıktı: checkpoint/faz8c_<veri>.pkl, tables/faz8c_bozma.csv"""
+"""Faz 8c: ε adaptation guide — supervised perturbation experiment (user approval 2026-10-23).
+Row-level best ε (ε*) for each (dataset, perturbation, level) condition:
+  inflated row = the P0 (random 70/30) model is correct, the model with the row's entity removed from training entirely (P2) is wrong
+  d            = test row's nearest-neighbour distance in P0 training / √dimension (signed log + z-score)
+  ε*           = threshold that best separates inflated rows by "d ≤ ε" (Youden J); 95% interval from 200 bootstraps
+Perturbations: relative noise, quantization to significant digits, row thinning (sliding-window frequency), feature subset.
+Output: checkpoint/faz8c_<veri>.pkl, tables/faz8c_bozma.csv"""
 import os
 import pickle
 import sys
@@ -25,7 +25,7 @@ N_BOOT = 200
 
 
 def boz(X, tur, duzey):
-    """(X', satır indeksi, sütun indeksi). Büyük veride bellek için float32 ve parça parça."""
+    """(X', row index, column index). float32 and chunked on large data to save memory."""
     n, p = X.shape
     if tur == "taban":
         return X, np.arange(n), np.arange(p)
@@ -40,7 +40,7 @@ def boz(X, tur, duzey):
         b = np.asarray(X[i:i + 500_000], dtype=np.float64)
         if tur == "gurultu":
             b = b * (1 + duzey * rs.standard_normal(b.shape))
-        elif tur == "nicem":          # anlamlı basamağa yuvarlama
+        elif tur == "nicem":          # rounding to significant digits
             with np.errstate(divide="ignore", invalid="ignore"):
                 k = np.where(b == 0, 0, duzey - 1 - np.floor(np.log10(np.abs(b))))
             b = np.round(b * 10.0 ** k) / 10.0 ** k
@@ -62,17 +62,17 @@ def kosul_olc(ad, X, y, v, tur, duzey):
     D, _ = en_yakin(Z, on(np.asarray(X[te_s], dtype=np.float64)), k=1, parca_te=2048, parca_tr=500_000)
     del Z
     d = D[:, 0] / np.sqrt(X.shape[1])
-    # P0 modeli
+    # P0 model
     tr_m = tr if len(tr) <= M.N_TR else np.random.RandomState(42).choice(tr, M.N_TR, replace=False)
     c0 = M.xgb_f1(np.asarray(X[tr_m]), y[tr_m], np.asarray(X[te_s]), y[te_s], 42) == y[te_s]
-    # varlık dışarıda referansı: her test satırı, kendi varlığı hiç görülmemiş modelle
+    # leave-entity-out reference: each test row, with a model that has never seen its entity
     c2 = np.full(len(te_s), np.nan)
     for e in np.unique(v[te_s]):
         tr_e = np.flatnonzero(v != e)
         if len(tr_e) < 100:
             continue
         sec = np.flatnonzero(v[te_s] == e)
-        sec = sec[np.isin(y[te_s[sec]], np.unique(y[tr_e]))]      # görülmemiş sınıf dışarıda
+        sec = sec[np.isin(y[te_s[sec]], np.unique(y[tr_e]))]      # unseen class excluded
         if len(sec) == 0:
             continue
         tr_e = tr_e if len(tr_e) <= M.N_TR else np.random.RandomState(42).choice(tr_e, M.N_TR, replace=False)
@@ -108,7 +108,7 @@ def main(ad):
     t0 = time.time()
     X, y, v, _ = M.veri(ad)
     y = np.asarray(y).astype(str); v = np.asarray(v).astype(str)
-    log(ad, "faz8c yüklendi", X.shape, f"{time.time() - t0:.0f}s")
+    log(ad, "faz8c loaded", X.shape, f"{time.time() - t0:.0f}s")
     for tur, duzey in KOSUL:
         if (tur, duzey) in tamam:
             continue

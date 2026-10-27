@@ -1,9 +1,9 @@
-"""Faz 7 I — ezber taban çizgisi ve yakın tekrar (GPU kNN, TÜM eğitim kümesiyle).
+"""Phase 7 I - memorization baseline and near-duplicates (GPU kNN, with the WHOLE training set).
 
-Her bölme için test kümesinden 20.000 satır; eğitim kümesinin tamamında en yakın komşu (işaretli log + z-skoru).
-Ölçüler: 1-NN doğruluğu ve makro F1 (yalnızca ezberle ulaşılabilecek başarı), birebir içerik tekrarı oranı,
-uzaklık eşiklerine göre yakın tekrar oranları, sınıf başına 1-NN geri çağırma.
-Kullanım: python3 faz7_I_ezber.py
+For each split, 20,000 rows from the test set; nearest neighbor over the entire training set (signed log + z-score).
+Measures: 1-NN accuracy and macro F1 (performance achievable by memorization alone), exact content duplicate rate,
+near-duplicate rates at distance thresholds, per-class 1-NN recall.
+Usage: python3 faz7_I_ezber.py
 """
 import time
 
@@ -61,9 +61,9 @@ def main():
                     r[f"NN1_geri_{s}"] = float((p[m] == i).mean()) if m.any() else np.nan
                 r["sure_s"] = round(time.time() - t0, 1)
                 SON.append(r); ck_yaz("I", SON); tamam.add(kayit)
-                log(kayit, f"tekrar={r['icerik_tekrar_%']:.1f}% NN1_F1={r['NN1_F1']:.4f} yakin0.01={r['yakin_tekrar_0.01_%']:.1f}% ({r['sure_s']}s)")
+                log(kayit, f"duplicate={r['icerik_tekrar_%']:.1f}% NN1_F1={r['NN1_F1']:.4f} near0.01={r['yakin_tekrar_0.01_%']:.1f}% ({r['sure_s']}s)")
     pd.DataFrame(SON).to_csv(f"{TAB}/I_ezber.csv", index=False)
-    log("I bitti")
+    log("I done")
 
 
 if __name__ == "__main__":

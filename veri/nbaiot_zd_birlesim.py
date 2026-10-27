@@ -1,6 +1,6 @@
-"""Zaman damgası büyüklüğündeki değerlerin (> 1e9) HH_jit ortalama ve varyans sütunlarındaki birleşimi, sınıf başına.
-Faz 6 B1 her sütunu ayrı sayar; burada satır en az bir HH_jit sütununda bu değeri taşıyorsa sayılır (eğitim yok).
-Çıktı: faz6_ciktilar/tables/B1b_zd_birlesim.csv (m: ortalama, v: varyans, u: birleşim; satır yüzdesi)"""
+"""Union of timestamp-magnitude values (> 1e9) across the HH_jit mean and variance columns, per class.
+Faz 6 B1 counts each column separately; here a row counts if it carries this value in at least one HH_jit column (no training).
+Output: faz6_ciktilar/tables/B1b_zd_birlesim.csv (m: mean, v: variance, u: union; row percentage)"""
 import os
 import sys
 
@@ -21,5 +21,5 @@ d = pd.DataFrame({"s": M.sinif.to_numpy(), "m": bm, "v": bv, "u": bm | bv})
 r = d.groupby("s")[["m", "v", "u"]].mean().mul(100).round(2)
 print(r.to_string())
 k = M.kotu.to_numpy() == 1
-print("saldırı birleşim %", round(100 * (bm | bv)[k].mean(), 2), " iyi huylu %", round(100 * (bm | bv)[~k].mean(), 2))
+print("attack union %", round(100 * (bm | bv)[k].mean(), 2), " benign %", round(100 * (bm | bv)[~k].mean(), 2))
 r.to_csv(os.path.expanduser("~/work/IoT_Botnet/faz6_ciktilar/tables/B1b_zd_birlesim.csv"))

@@ -1,11 +1,11 @@
-"""Faz 7 K — kısayol taraması (GPU XGBoost).
+"""Phase 7 K - shortcut scan (GPU XGBoost).
 
-K1  Tek öznitelikle 11 sınıf (D'hooge 2022 tek-öznitelik testi; Flood 2024 HDF_C sezgiseli): S1 rastgele ve S6f
-    (blok ayrık, sızıntı arındırılmış). Her öznitelik için makro F1, MCC, tcp/udp geri çağırma.
-K2  Öznitelik grupları (MI_dir, H, HH, HH_jit, HpHp) ve λ pencereleri; grup tek başına / grup hariç.
-K3  Cihaz tanınabilirliği: aynı saldırı türünün satırlarından cihazı tahmin et. Yakalama cihazlar arasında
-    paylaşılıyorsa doğruluk şans düzeyine iner; iyi huyluda yüksek kalmalı. (zaman damgalı/damgasız)
-Kullanım: python3 faz7_K_kisayol.py
+K1  11 classes from a single feature (D'hooge 2022 single-feature test; Flood 2024 HDF_C heuristic): S1 random and S6f
+    (block-disjoint, leakage-purged). Macro F1, MCC, tcp/udp recall for each feature.
+K2  Feature groups (MI_dir, H, HH, HH_jit, HpHp) and lambda windows; group alone / group excluded.
+K3  Device identifiability: predict the device from rows of the same attack type. If the capture is shared across
+    devices, accuracy falls to chance level; it should stay high for benign. (with/without timestamp)
+Usage: python3 faz7_K_kisayol.py
 """
 import re
 
@@ -56,12 +56,12 @@ def main():
     bolmeler_ = {"S1": (rs.choice(S1[2], N, replace=False), rs.choice(S1[3], N, replace=False)),
                  "S6f": (rs.choice(S6f[2], N, replace=False), rs.choice(S6f[3], min(N, len(S6f[3])), replace=False))}
 
-    # K1 tek öznitelik
+    # K1 single feature
     for bad, (tr, te) in bolmeler_.items():
         for j, c in enumerate(ozn):
             degerlendir(f"K1|{bad}|{c}", [j], tr, te, bolme=bad, oznitelik=c, zd=j in zi)
 
-    # K2 gruplar
+    # K2 groups
     grup = {}
     for j, c in enumerate(ozn):
         g = re.match(r"(MI_dir|HH_jit|HpHp|HH|H)_L([\d.]+)_", c)
@@ -75,7 +75,7 @@ def main():
             degerlendir(f"K2|{bad}|{tip}|{g}|yalniz_zdsiz", [j for j in cols if j not in zi], tr, te,
                         bolme=bad, tip=tip, grup=g, kip="yalniz_zdsiz") if any(j in zi for j in cols) else None
 
-    # K3 cihaz tanınabilirliği (rastgele %70/30, sınıf başına)
+    # K3 device identifiability (random 70/30, per class)
     cihaz = M.cihaz.to_numpy()
     cs = np.array(sorted(set(cihaz)))
     ck = np.searchsorted(cs, cihaz)
@@ -98,7 +98,7 @@ def main():
                       "dogruluk": float((pr == ck[te]).mean()), "sans_cogunluk": float(say.max() / say.sum()),
                       "F1_makro": f1_score(ck[te], pr, average="macro")})
     pd.DataFrame(SON).to_csv(f"{TAB}/K_kisayol.csv", index=False)
-    log("K bitti")
+    log("K done")
 
 
 if __name__ == "__main__":

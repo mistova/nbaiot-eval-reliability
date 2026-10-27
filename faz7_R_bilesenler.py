@@ -1,15 +1,15 @@
-"""Faz 7 R — değerlendirme güvenilirliği metriği (Bölüm 11.5) için ADAY BİLEŞENLERİN veri setleri arasında ölçümü.
-Metrik burada önerilmiyor; yalnızca bileşenler aynı tanımla her veri setinde ölçülüyor.
+"""Faz 7 R — measurement of CANDIDATE COMPONENTS of the evaluation-reliability metric (Section 11.5) across datasets.
+The metric is not proposed here; only the components are measured with the same definition on every dataset.
 
-Bileşenler (tümü üstveri sütunları — kimlik, IP, port, zaman — çıkarılmış öznitelik vektöründe):
-  tekrar_payi          1 − tekil/satır
-  celiskili_satir_%    farklı etiketlerde de görünen vektörleri taşıyan satırlar
-  dogruluk_tavani      çelişkili vektörlerde çoğunluk etiketiyle ulaşılabilecek en yüksek doğruluk (Li 2026)
-  rastgele_ikiz_%      rastgele %70/30 bölmede test satırının eğitimde birebir bulunma oranı (3 tohum)
-  varlik_disi_ikiz_%   bir varlık (cihaz/gün/senaryo/yakalama) dışarıda bırakıldığında satırlarının geri kalanda bulunma oranı
-  NN1_F1_rastgele / NN1_F1_temiz   1-NN makro F1: rastgele test / eğitimde ikizi olmayan test (ezber payı)
-  HDF_max_F1           tek öznitelikle en yüksek makro F1 (Flood 2024 HDF_C; GPU XGB, 100k alt örneklem)
-Kullanım: python3 faz7_R_bilesenler.py <veri_seti> [...]   veri setleri: nbaiot cic2023 cicids2017 cicids2017_engelen botiot medbiot kitsune
+Components (all on a feature vector with metadata columns — id, IP, port, time — removed):
+  tekrar_payi          1 − unique/rows
+  celiskili_satir_%    rows carrying vectors that also appear under different labels
+  dogruluk_tavani      highest accuracy reachable with the majority label on conflicting vectors (Li 2026)
+  rastgele_ikiz_%      share of test rows found exactly in training under a random 70/30 split (3 seeds)
+  varlik_disi_ikiz_%   share of an entity's (device/day/scenario/capture) rows found in the rest when it is left out
+  NN1_F1_rastgele / NN1_F1_temiz   1-NN macro F1: random test / test without a twin in training (memorization share)
+  HDF_max_F1           highest macro F1 with a single feature (Flood 2024 HDF_C; GPU XGB, 100k subsample)
+Usage: python3 faz7_R_bilesenler.py <dataset> [...]   datasets: nbaiot cic2023 cicids2017 cicids2017_engelen botiot medbiot kitsune
 """
 import glob
 import sys
@@ -34,7 +34,7 @@ def _sayisal(df):
 
 
 def yukle_veri(ad):
-    """Döndürür: X (float64), y (str etiket), varlik (str veya None), oznitelik adları."""
+    """Returns: X (float64), y (str label), varlik (str or None), feature names."""
     global ON_HASH, EK
     if ad == "nbaiot":
         X, M, ozn = yukle()
@@ -79,20 +79,20 @@ def yukle_veri(ad):
     if ad == "medbiot":
         parca, ys, vs, hs, zd = [], [], [], [], []
         for f in sorted(glob.glob(f"{VERI}/medbiot/fine-grained/structured_dataset/*/*.csv")):
-            b = os.path.basename(f)[:-4].split("_")          # ör. mirai_mal_CC_fan, bashlite_leg_lock
+            b = os.path.basename(f)[:-4].split("_")          # e.g. mirai_mal_CC_fan, bashlite_leg_lock
             aile, tur = b[0], b[1]
             cihaz = b[-1]
             etiket = "normal" if tur == "leg" else f"{aile}_{'_'.join(b[2:-1]) or 'mal'}"
             df = pd.read_csv(f, engine="pyarrow")
             df = df[[c for c in df.columns if c.lower() not in METAVERI]].select_dtypes(include=[np.number])
             x = _sayisal(df); del df
-            hs.append(hashle(x))                    # hash tam duyarlıkta; bellek için float32 saklanır
+            hs.append(hashle(x))                    # hash at full precision; stored as float32 to save memory
             zd.append(int((x[:, [j for j, c in enumerate(ozn_) if c.startswith("HH_jit") and "_mean" in c]] > 1e9).any(1).sum())
                       if (ozn_ := list(pd.read_csv(f, nrows=0).columns)) else 0)
             parca.append(x.astype(np.float32)); del x
             ys.append(np.full(len(parca[-1]), etiket, dtype=object))
             vs.append(np.full(len(parca[-1]), cihaz, dtype=object)); ozn = ozn_
-            log(ad, b, len(parca[-1]), "zd satır:", zd[-1])
+            log(ad, b, len(parca[-1]), "zd rows:", zd[-1])
         ON_HASH = np.concatenate(hs); EK = {"jit_mean_zd_satir": int(sum(zd))}
         return np.concatenate(parca), np.concatenate(ys), np.concatenate(vs), ozn
     if ad == "kitsune":
@@ -102,13 +102,13 @@ def yukle_veri(ad):
             if not fx or not fl:
                 continue
             Xd = pd.read_csv(fx[0], header=None, engine="pyarrow").to_numpy(np.float64)
-            if Xd.shape[1] == 116:                 # Mirai dosyasında sıra numarası sütunu
+            if Xd.shape[1] == 116:                 # row-index column in the Mirai file
                 Xd = Xd[:, 1:]
             yl = pd.read_csv(fl[0]).iloc[:, -1].to_numpy()
             n = min(len(Xd), len(yl)); isim = os.path.basename(d.rstrip("/"))
             hs.append(hashle(Xd[:n])); parca.append(Xd[:n].astype(np.float32)); del Xd
             ys.append(np.where(yl[:n] > 0, isim, "benign").astype(object))
-            vs.append(np.full(n, isim, dtype=object)); log(ad, isim, n, "saldırı payı", float((yl[:n] > 0).mean()))
+            vs.append(np.full(n, isim, dtype=object)); log(ad, isim, n, "attack share", float((yl[:n] > 0).mean()))
         ON_HASH = np.concatenate(hs)
         X = np.concatenate(parca)
         return X, np.concatenate(ys), np.concatenate(vs), [f"f{j}" for j in range(X.shape[1])]
@@ -128,10 +128,10 @@ def hashle(X):
 def main(ad):
     SON = ck_oku("R")
     if any(r["veri"] == ad for r in SON):
-        log(ad, "zaten var"); return
+        log(ad, "already exists"); return
     X, y, v, ozn = yukle_veri(ad)
     n = len(y)
-    log(ad, "yüklendi", X.shape)
+    log(ad, "loaded", X.shape)
     H = ON_HASH if ON_HASH is not None and len(ON_HASH) == n else hashle(X)
     r = {"veri": ad, "satir": n, "oznitelik": X.shape[1], "sinif": len(set(y)), **EK}
     u = np.unique(H)
@@ -153,7 +153,7 @@ def main(ad):
             vals.append(100 * np.isin(H[m], np.unique(H[~m])).mean())
         r["varlik_sayisi"] = len(vals)
         r["varlik_disi_ikiz_%"] = float(np.mean(vals)); r["varlik_disi_ikiz_max_%"] = float(np.max(vals))
-    # 1-NN ezber (rastgele bölme, eğitim en çok 2M, test 20k)
+    # 1-NN memorization (random split, training at most 2M, test 20k)
     rs = np.random.RandomState(42)
     p = rs.permutation(n); k = int(0.7 * n)
     tr, te = p[:k][:2_000_000], p[k:]
@@ -166,7 +166,7 @@ def main(ad):
     r["NN1_dogruluk_rastgele"] = float((pr == y[te_s]).mean())
     r["NN1_F1_temiz"] = f1_score(y[te_s][~ikiz], pr[~ikiz], average="macro") if (~ikiz).sum() > 100 else np.nan
     r["test_ikiz_orneklem_%"] = 100 * ikiz.mean()
-    # HDF_C: tek öznitelikle en yüksek makro F1
+    # HDF_C: highest macro F1 with a single feature
     from xgboost import XGBClassifier
     alt = rs.choice(n, min(n, 140_000), replace=False)
     sin = np.array(sorted(set(y))); yk = np.searchsorted(sin, y[alt])
@@ -191,5 +191,5 @@ if __name__ == "__main__":
     for a in sys.argv[1:]:
         try:
             main(a)
-        except Exception as e:  # bir veri setindeki hata diğerlerini durdurmasın
+        except Exception as e:  # an error in one dataset must not stop the others
             log(a, "HATA", repr(e))

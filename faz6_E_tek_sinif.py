@@ -1,14 +1,14 @@
-"""Faz 6 / E — tek sınıflı rejimde iddia 8 ve 9'un sınanması (TensorFlow; sklearn paralel rutini yok).
+"""Faz 6 / E — testing claims 8 and 9 in the one-class regime (TensorFlow; no parallel sklearn routine).
 
-Faz 4b ile aynı tasarım: float32 okuma, iyi huylu zaman sırası %60/%10/%30, kalibrasyon
-diliminden mu/sd, ±20 kırpma, q99 eşiği, saldırı türü başına ilk 30.000 satır.
-Değişkenler: yapılandırma (D-D cihaz modeli / G-G küresel model) × öznitelik seti
-(115 / HH_jit'siz 100) × 5 tohum.
+Same design as Faz 4b: float32 reading, benign time order 60%/10%/30%, mu/sd from the
+calibration slice, clipping at +-20, q99 threshold, first 30,000 rows per attack type.
+Variables: configuration (D-D per-device model / G-G global model) x feature set
+(115 / 100 without HH_jit) x 5 seeds.
 
-Ek ölçüm: tcp/udp'nin baskın içerik vektörüyle aynı olan iyi huylu "ilk paket" satırlarının
-hatası ve eşiğe göre konumu (H: tcp TPR'si bu tek noktanın eşiği geçip geçmediğiyle belirleniyor).
+Extra measurement: error and position relative to the threshold of the benign "first packet" rows
+that match the dominant content vector of tcp/udp (H: the tcp TPR is determined by whether this single point crosses the threshold).
 
-Çıktı: faz6_ciktilar/tables/E_tek_sinif.csv · checkpoint: faz6_ciktilar/faz6_E_checkpoint.pkl
+Output: faz6_ciktilar/tables/E_tek_sinif.csv · checkpoint: faz6_ciktilar/faz6_E_checkpoint.pkl
 """
 import glob
 import os
@@ -116,14 +116,14 @@ def main():
         return A[:i1], A[i1:i2], A[i2:]
     BOL = {c: dict(zip(("kal", "esik", "test"), bol(IYI[c]))) for c in CIHAZ}
 
-    # tcp baskın içerik vektörüyle (zaman damgası hariç) aynı olan iyi huylu satırlar
+    # benign rows identical to the tcp dominant content vector (excluding the timestamp)
     def icerik(A):
         return pd.util.hash_pandas_object(pd.DataFrame(np.delete(A, zd, axis=1)), index=False).to_numpy()
     ILK = {}
     for c in CIHAZ:
         ht = icerik(SAL[c]["gafgyt:tcp"]); u, n = np.unique(ht, return_counts=True)
         ILK[c] = IYI[c][icerik(IYI[c]) == u[n.argmax()]]
-    log("yüklendi;", {c[:10]: len(v) for c, v in ILK.items()}, "ilk-paket satırı")
+    log("loaded;", {c[:10]: len(v) for c, v in ILK.items()}, "first-packet rows")
 
     D = pickle.load(open(CKPT, "rb")) if os.path.exists(CKPT) else []
     tamam = {(r["yapilandirma"], r["cihaz"], r["oznitelik"], r["tohum"]) for r in D}

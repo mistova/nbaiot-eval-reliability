@@ -1,4 +1,4 @@
-"""Faz 6 sonuçlarını tek bir markdown raporunda toplar: faz6_ciktilar/FAZ6_OZET.md"""
+"""Collects the Faz 6 results into a single markdown report: faz6_ciktilar/FAZ6_OZET.md"""
 import os
 import sys
 
@@ -23,7 +23,7 @@ def bas(baslik, df, ondalik=4):
 
 
 def ms(g, cols):
-    """ortalama ± std metni"""
+    """mean ± std text"""
     m, s = g[cols].mean(), g[cols].std()
     return pd.DataFrame({c: [f"{m[c]:.4f} ± {s[c]:.4f}" if pd.notna(s[c]) else f"{m[c]:.4f}"] for c in cols})
 
@@ -113,4 +113,4 @@ for ad, b in (("G1_cic2023_etiket_tekillik.csv", "G1 — CIC-IoT2023 etiket baş
     bas(b, oku(ad), 3)
 
 open(f"{OUT}/FAZ6_OZET.md", "w", encoding="utf-8").write("# Faz 6 — sonuç özeti (otomatik)\n" + "".join(parca))
-print("yazıldı:", f"{OUT}/FAZ6_OZET.md")
+print("written:", f"{OUT}/FAZ6_OZET.md")
